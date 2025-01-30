@@ -1,0 +1,50 @@
+**Utils monorepo: Datetime Utils**
+==================================
+
+Just some Python date and time utils.
+
+
+Usage
+=====
+
+---
+
+Local dir install
+-----------------
+To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:
+```toml
+[project]
+...
+dependencies = [
+    "datetime-utils @ file:///Users/myuser/workspace/utils-monorepo/datetime-utils"
+]
+
+[tool.poetry.dependencies]
+# This section is required only when there are editable (develop = true) dependencies.
+datetime-utils = {develop = true}
+```
+
+Github install
+--------------
+To install this client in a Poetry project, from Github, add this to `pyproject.toml`:
+```toml
+[project]
+...
+dependencies = [
+    "datetime-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=datetime-utils",
+]
+```
+
+Pip install
+-----------
+```sh
+$ pip install "datetime-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=datetime-utils"
+```
+
+
+Development setup
+=================
+
+---
+
+See [README.md](../README.md) in the root dir.
