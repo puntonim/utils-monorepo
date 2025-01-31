@@ -1,5 +1,7 @@
 from datetime import datetime, time, timezone
 
+SECS_IN_1_DAY = 60 * 60 * 24
+
 
 def now_utc() -> datetime:
     """
@@ -40,3 +42,79 @@ def is_naive(d: datetime | time):
     if d.tzinfo is None or d.tzinfo.utcoffset(d) is None:
         return True
     return False
+
+
+def short_format_date(date: datetime):
+    """
+    Eg. 2023-09-02 15:36:03 GMT.
+    """
+    return date.strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
+def shortest_format_date(date: datetime):
+    """
+    Eg. 05/01/23 08:09.
+    """
+    # Convert to local timezone.
+    date = date.astimezone()
+    return date.strftime("%d/%m/%y %H:%M")
+
+
+def days_ago(d: datetime, n_decimal_digits: int = 1):
+    """
+    Example:
+        >>> days_ago(datetime(2023, 11, 20, 7, 0, 0, tzinfo=timezone.utc))
+        4.1
+        >>> days_ago(datetime(2023, 11, 20, 7, 0, 0, tzinfo=timezone.utc), n_decimal_digits=5)
+        4.10828
+    """
+    if is_naive(d):
+        raise TypeError("Naive datetime not supported")
+    return round((now_utc() - d).total_seconds() / SECS_IN_1_DAY, n_decimal_digits)
+
+
+def days_to_go(d: datetime, n_decimal_digits: int = 1):
+    """
+    Example:
+        >>> days_to_go(datetime(2023, 11, 20, 7, 0, 0, tzinfo=timezone.utc))
+        4.1
+        >>> days_to_go(datetime(2023, 11, 20, 7, 0, 0, tzinfo=timezone.utc), n_decimal_digits=5)
+        4.10828
+    """
+    if is_naive(d):
+        raise TypeError("Naive datetime not supported")
+    return round((d - now_utc()).total_seconds() / SECS_IN_1_DAY, n_decimal_digits)
+
+
+def convert_all_isoformat_values_in_dict_to_datetime(data: dict):
+    """
+    Given a dict like:
+        {
+            "symbol": "LIT",
+            "price": 34.5,
+            "buy_date": "2022-01-19T00:00:00+00:00",
+        }
+     it converts "buy_date" to a datetime instance.
+
+    Note: it tries to convert all values (the key name does not matter).
+    """
+    for k, v in data.items():
+        # Do recurse inside dicts.
+        if isinstance(v, dict):
+            data[k] = convert_all_isoformat_values_in_dict_to_datetime(v)
+            continue
+        # Do recurse inside lists.
+        if isinstance(v, list):
+            v_converted = list()
+            for item in v:
+                v_converted.append(
+                    convert_all_isoformat_values_in_dict_to_datetime(item)
+                )
+            data[k] = v_converted
+            continue
+        # Try to convert to datetime.
+        try:
+            data[k] = datetime.fromisoformat(v)
+        except (TypeError, ValueError) as exc:
+            pass
+    return data
