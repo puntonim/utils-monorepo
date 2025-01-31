@@ -23,6 +23,8 @@ class CustomJsonEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
             return obj.isoformat()
+        elif isinstance(obj, bytes):
+            return obj.decode()
         elif obj.__class__.__name__ == "Decimal":
             # It's the Decimal class coming from DynamoDB and
             #  we don't want to import its lib, so we check for the
