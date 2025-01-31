@@ -1,7 +1,7 @@
-**Utils monorepo: JSON Utils**
+**Utils monorepo: Log Utils**
 ==================================
 
-Just some Python JSON utils.
+Just some Python logging utils.
 
 
 Usage
@@ -16,13 +16,13 @@ To install this client in a Poetry project, from a local dir, add this to `pypro
 [project]
 ...
 dependencies = [
-    "json-utils @ ../json-utils"
-    # "json-utils @ file:///Users/myuser/workspace/utils-monorepo/json-utils"
+    "log-utils @ ../log-utils"
+    # "log-utils @ file:///Users/myuser/workspace/utils-monorepo/log-utils"
 ]
 
 [tool.poetry.dependencies]
 # This section is required only when there are editable (develop = true) dependencies.
-json-utils = {develop = true}
+log-utils = {develop = true}
 ```
 
 Github install
@@ -32,14 +32,14 @@ To install this client in a Poetry project, from Github, add this to `pyproject.
 [project]
 ...
 dependencies = [
-    "json-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=json-utils",
+    "log-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=log-utils",
 ]
 ```
 
 Pip install
 -----------
 ```sh
-$ pip install "json-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=json-utils"
+$ pip install "log-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=log-utils"
 ```
 
 

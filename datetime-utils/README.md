@@ -16,7 +16,8 @@ To install this client in a Poetry project, from a local dir, add this to `pypro
 [project]
 ...
 dependencies = [
-    "datetime-utils @ file:///Users/myuser/workspace/utils-monorepo/datetime-utils"
+    "datetime-utils @ ../datetime-utils"
+    # "datetime-utils @ file:///Users/myuser/workspace/utils-monorepo/datetime-utils"
 ]
 
 [tool.poetry.dependencies]

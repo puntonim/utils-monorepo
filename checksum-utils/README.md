@@ -16,7 +16,8 @@ To install this client in a Poetry project, from a local dir, add this to `pypro
 [project]
 ...
 dependencies = [
-    "checksum-utils @ file:///Users/myuser/workspace/utils-monorepo/checksum-utils"
+    "checksum-utils @ ../checksum-utils"
+    # "checksum-utils @ file:///Users/myuser/workspace/utils-monorepo/checksum-utils"
 ]
 
 [tool.poetry.dependencies]
