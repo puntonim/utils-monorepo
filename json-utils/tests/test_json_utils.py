@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytest
 
-from json_utils import json_utils
+import json_utils
 
 
 class TestToJson:

@@ -1,3 +1,17 @@
+"""
+** JSON UTILS **
+================
+```py
+import json
+import json_utils
+
+data = {"date": datetime(2025, 1, 1)}
+json_utils.to_json(data)
+
+json.dumps(data, cls=json_utils.CustomJsonEncoder)
+```
+"""
+
 import json
 from datetime import datetime
 from uuid import UUID

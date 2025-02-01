@@ -7,6 +7,8 @@ Just some Python JSON utils.
 Usage
 =====
 
+See top docstrings in [json_utils.py](json_utils/json_utils.py).
+
 ---
 
 Local dir install
