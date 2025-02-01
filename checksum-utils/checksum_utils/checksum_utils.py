@@ -31,6 +31,13 @@ from typing import Any, Callable
 
 from json_utils import json_utils
 
+# Objects exported to the `import *` in `__init__.py`.
+__all__ = [
+    "blake2b_checksum_for_file",
+    "md5_checksum_for_data",
+    "md5_checksum_for_file",
+]
+
 
 def md5_checksum_for_data(
     obj: Any, do_try_json_conversion=True, custom_json_encoder=None

@@ -147,7 +147,7 @@ develop = false
 type = "git"
 url = "https://github.com/puntonim/utils-monorepo"
 reference = "HEAD"
-resolved_reference = "e94d9f4ab92101627ce0682ae0b2fcba854f4d8e"
+resolved_reference = "7e2e93143a0fcffa6c7c39e1cfea077fa7f2a22c"
 subdirectory = "json-utils"
 
 [[package]]

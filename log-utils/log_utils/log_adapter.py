@@ -157,6 +157,20 @@ import sys
 
 from .adapters.std_lib_logging_adapter import StdLibLoggingAdapter
 
+# Objects exported to the `import *` in `__init__.py`.
+__all__ = [
+    "critical",
+    "debug",
+    "error",
+    "exception",
+    "flush_adapter",
+    "get_adapter",
+    "info",
+    "set_adapter",
+    "set_root_logger_to_stderr",
+    "warning",
+]
+
 _LOG_ADAPTER = None
 
 

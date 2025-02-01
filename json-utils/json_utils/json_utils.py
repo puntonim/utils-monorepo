@@ -16,6 +16,12 @@ import json
 from datetime import datetime
 from uuid import UUID
 
+# Objects exported to the `import *` in `__init__.py`.
+__all__ = [
+    "CustomJsonEncoder",
+    "to_json",
+]
+
 
 def to_json(data, sort_keys=False, **kwargs) -> str:
     """
