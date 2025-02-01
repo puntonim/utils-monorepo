@@ -1,6 +1,6 @@
 [project]
-name = "log-utils"
-description = "Log Utils"
+name = "peewee-utils"
+description = "Peewee Utils"
 version = "1.0.0"
 authors = [
     {name = "puntonim",email = "puntonim@gmail.com"}
@@ -8,17 +8,15 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "peewee (>=3.17.8,<4.0.0)",
+    # Do not use local install or it might conflict with a project that installs
+    #  both peewee-utils and log-utils from Github.
+    "log-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=log-utils",
 ]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[project.optional-dependencies]
-# Extra (optional) dependencies that users of this project might choose to install or not.
-rich-adapter = ["rich (>=13.9.4,<14.0.0)"]
-loguru-adapter = ["loguru (>=0.7.3,<0.8.0) ; python_version < '4'"]
-powertools-adapter = ["aws-lambda-powertools (>=3.5.0,<4.0.0) ; python_version < '4'"]
 
 [tool.poetry.group.dev.dependencies]
 black = "24.10.0"
