@@ -1,5 +1,7 @@
 """
-Cryptographic hash algorithms
+** CRYPTOGRAPHIC HASH ALGORITHMS OVERVIEW **
+============================================
+
 Docs: https://en.wikipedia.org/wiki/Cryptographic_hash_function#Cryptographic_hash_algorithms
 
 In brief:
@@ -7,6 +9,18 @@ In brief:
 - SHA2 is old (2001) and with a relatively low collision prob, but slow.
 - BLAKE2 is recent (2012) and with a low collision prob. Faster than MD5, thus the best choice.
 - BLAKE3 is the most recent (2020), the fastest, promising but not popular yet.
+
+
+** CHECKSUM UTILS **
+====================
+```py
+import checksum_utils
+
+data = "hello \n\\s\t\r &!%world"
+ck = checksum_utils.md5_checksum_for_data(data)
+
+ck = checksum_utils.md5_checksum_for_file("../myfile.txt")
+```
 """
 
 import hashlib
@@ -73,12 +87,12 @@ def blake2b_checksum_for_file(
             raise FileNotFoundError
         if absolute_file_path.is_dir():
             raise IsADirectoryError
-        return blake2b_checksum_for_file_lru(absolute_file_path)
+        return _blake2b_checksum_for_file_lru(absolute_file_path)
     return _checksum_for_file(file_path, hashlib.blake2b)
 
 
 @lru_cache
-def blake2b_checksum_for_file_lru(absolute_file_path: Path):
+def _blake2b_checksum_for_file_lru(absolute_file_path: Path):
     return _checksum_for_file(absolute_file_path, hashlib.blake2b)
 
 

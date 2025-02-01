@@ -8,16 +8,14 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "json-utils @ ../json-utils"
+    # Do not use local install or it might conflict with a project that installs
+    #  both checksum-utils and json-utils from Github.
+    "json-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=json-utils",
 ]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.dependencies]
-# This section is required only when there are editable (develop = true) dependencies.
-json-utils = {develop = true}
 
 [tool.poetry.group.dev.dependencies]
 black = "24.10.0"

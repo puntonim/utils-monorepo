@@ -3,7 +3,7 @@ from datetime import datetime
 from unittest import mock
 from uuid import UUID
 
-from checksum_utils import checksum_utils
+import checksum_utils
 
 
 class TestMd5ChecksumForData:
@@ -42,7 +42,7 @@ class TestMd5ChecksumForFile:
             tempfile.NamedTemporaryFile() as tmp,
             mock.patch(
                 "checksum_utils.checksum_utils._checksum_for_file",
-                wraps=checksum_utils._checksum_for_file,
+                wraps=checksum_utils.checksum_utils._checksum_for_file,
             ) as mock_checksum_for_file,
         ):
 
@@ -103,7 +103,7 @@ class TestBlake2bChecksumForFile:
             tempfile.NamedTemporaryFile() as tmp,
             mock.patch(
                 "checksum_utils.checksum_utils._checksum_for_file",
-                wraps=checksum_utils._checksum_for_file,
+                wraps=checksum_utils.checksum_utils._checksum_for_file,
             ) as mock_checksum_for_file,
         ):
 

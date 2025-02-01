@@ -9,6 +9,9 @@ Usage
 
 ---
 
+See top docstring in [checksum_utils.py](checksum_utils/checksum_utils.py).
+
+
 Local dir install
 -----------------
 To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:
