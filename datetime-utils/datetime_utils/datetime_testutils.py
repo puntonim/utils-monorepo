@@ -1,3 +1,29 @@
+"""
+** DATETIME TESTUTILS **
+========================
+```py
+from datetime_utils import datetime_testutils
+
+class TestFreezeTime:
+    NOW = datetime(2022, 1, 21, 20, 33, 0).astimezone()
+
+    @datetime_testutils.freeze_time(NOW)
+    def test_happy_flow(self):
+        assert datetime_utils.now() == self.NOW
+
+
+class TestApproxNow:
+    NOW = datetime(2022, 1, 21, 20, 33, 0).astimezone()
+
+    @datetime_testutils.freeze_time(NOW)
+    def test_happy_flow(self):
+        d = self.NOW + timedelta(seconds=3)
+        assert d != self.NOW
+        assert datetime_testutils.approx_now(buffer_seconds=20) == d
+
+```
+"""
+
 from contextlib import ContextDecorator
 from datetime import datetime, timezone
 from unittest import mock
@@ -35,6 +61,8 @@ class freeze_time(ContextDecorator):
         self.date = date
         self.mock0 = None
         self.mock1 = None
+        self.mock2 = None
+        self.mock3 = None
 
     def __enter__(self):
         self.mock0 = mock.patch(
@@ -42,16 +70,28 @@ class freeze_time(ContextDecorator):
             return_value=self.date.astimezone(timezone.utc),
         )
         self.mock0.start()
-
         self.mock1 = mock.patch(
+            "datetime_utils.now_utc",
+            return_value=self.date.astimezone(timezone.utc),
+        )
+        self.mock1.start()
+
+        self.mock2 = mock.patch(
             "datetime_utils.datetime_utils.now",
             return_value=self.date.astimezone(),
         )
-        self.mock1.start()
+        self.mock2.start()
+        self.mock3 = mock.patch(
+            "datetime_utils.now",
+            return_value=self.date.astimezone(),
+        )
+        self.mock3.start()
 
     def __exit__(self, *exc):
         self.mock0.stop()
         self.mock1.stop()
+        self.mock2.stop()
+        self.mock3.stop()
 
 
 class approx_now:

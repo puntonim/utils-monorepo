@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
-from datetime_utils import datetime_testutils, datetime_utils
+import datetime_utils
+from datetime_utils import datetime_testutils
 
 
 class TestFreezeTime:

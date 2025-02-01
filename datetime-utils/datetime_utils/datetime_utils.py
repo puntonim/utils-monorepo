@@ -1,5 +1,14 @@
 """
+** DATETIME UTILS **
+====================
+
 Note: there are a few more utils about WORKING DAYS AND HOLIDAYS in `ibkr-etf-trade-ideas`.
+
+```py
+import datetime_utils
+
+datetime_utils.now_utc()
+```
 """
 
 from datetime import datetime, time, timezone
