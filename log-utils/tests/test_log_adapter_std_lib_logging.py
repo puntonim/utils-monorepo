@@ -1,11 +1,13 @@
 import logging
 
-from log_utils.std_lib_logging_utils import logger
+import log_utils as logger
 
 
-class TestStdLibLoggingAdapter:
+class TestStdLibLogging:
     def setup_method(self):
-        logger.configure_default(is_verbose=True)
+        self.std_logging = logger.StdLibLoggingAdapter()
+        self.std_logging.configure_default(is_verbose=True)
+        logger.set_adapter(self.std_logging)
 
         self.debug_message = "First entry, debug"
         self.info_message = "Second entry, info"
@@ -13,6 +15,9 @@ class TestStdLibLoggingAdapter:
         self.error_message = "Fourth entry, error"
         self.critical_message = "Fifth entry, critical"
         self.exception_message = "Sixth entry, exception"
+
+    def teardown_method(self):
+        logger.flush_adapter()
 
     def test_happy_flow(self, caplog):
         caplog.set_level(logging.DEBUG)
@@ -23,7 +28,7 @@ class TestStdLibLoggingAdapter:
 
         logger.info(
             self.info_message,
-            extra=dict(color="red", car="ferrari", myclass=TestStdLibLoggingAdapter),
+            extra=dict(color="red", car="ferrari", myclass=TestStdLibLogging),
         )
         assert caplog.records[1].message.startswith(self.info_message)
         assert "color=red" in caplog.records[1].message

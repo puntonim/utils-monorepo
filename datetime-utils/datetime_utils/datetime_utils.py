@@ -1,3 +1,7 @@
+"""
+Note: there are a few more utils about WORKING DAYS AND HOLIDAYS in `ibkr-etf-trade-ideas`.
+"""
+
 from datetime import datetime, time, timezone
 
 SECS_IN_1_DAY = 60 * 60 * 24
