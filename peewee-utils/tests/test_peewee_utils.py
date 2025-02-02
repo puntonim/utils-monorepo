@@ -52,7 +52,7 @@ def _create_models():
     )
 
     # At last, configure peewee_utils.
-    peewee_utils.configure(db_path=":memory:")
+    peewee_utils.configure(sqlite_db_path=":memory:")
 
 
 @peewee_utils.use_db

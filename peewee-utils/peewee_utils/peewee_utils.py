@@ -5,6 +5,7 @@
 Used, among the others, in:
  - strava-monorepo/projects/strava-exporter-to-db: a simple CLI (without any
     CLI framework).
+ - strava-monorepo/libs/strava-db-models: Peewee models.
 
 Models definition
 -----------------
@@ -60,8 +61,8 @@ END;
 \""" <------ IMP: remove the \
 )
 
-# At last, configure peewee_utils.
-peewee_utils.configure(db_path=settings.DB_PATH)
+# At last, configure peewee_utils with the SQLite DB path.
+peewee_utils.configure(sqlite_db_path=settings.SQLITE_DB_PATH)
 ```
 
 Functions/methods that require access to DB
@@ -109,14 +110,14 @@ _TRIGGERS_SQL = []
 _SQL_FUNCTIONS = []
 
 _CONFIG = {
-    "db_path": ":memory:",
+    "sqlite_db_path": ":memory:",
     "do_log_peewee_queries": False,
 }
 
 
-def configure(db_path: str = ":memory:", do_log_peewee_queries: bool = False):
+def configure(sqlite_db_path: str = ":memory:", do_log_peewee_queries: bool = False):
     global _CONFIG
-    _CONFIG["db_path"] = db_path
+    _CONFIG["sqlite_db_path"] = sqlite_db_path
     _CONFIG["do_log_peewee_queries"] = do_log_peewee_queries
 
     if do_log_peewee_queries:
@@ -152,9 +153,9 @@ def __getattr__(name: str) -> Any:
 
 def _db_init():
     global _CONFIG
-    db_path = _CONFIG["db_path"]
-    # Note: db_path gets stored in `db.database`.
-    logger.info(f"Using DB {db_path} ...")
+    sqlite_db_path = _CONFIG["sqlite_db_path"]
+    # Note: sqlite_db_path gets stored in `db.database`.
+    logger.info(f"Using DB {sqlite_db_path} ...")
 
     # Use PRAGMA foreign_keys to enforce foreign-key constraints to avoid being able to
     #  insert a row with a foreign key ID that does not exist.
@@ -170,7 +171,7 @@ def _db_init():
     #  https://docs.peewee-orm.com/en/latest/peewee/database.html#dynamically-defining-a-database
     global db
     db = connect(
-        f"sqlite+pool:///{db_path}{pool_config}",
+        f"sqlite+pool:///{sqlite_db_path}{pool_config}",
         # Disable PRAGMA `recursive_triggers` because we defined a trigger to handle
         #  `updated_at` (btw the default value is OFF).
         pragmas={"foreign_keys": "ON", "recursive_triggers": "OFF"},
