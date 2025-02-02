@@ -11,7 +11,6 @@ Usage
 
 See top docstring in [peewee_utils.py](peewee_utils/peewee_utils.py).
 
-
 Local dir install
 -----------------
 To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:

@@ -7,10 +7,10 @@ Just some Python date and time utils.
 Usage
 =====
 
+---
+
 See top docstrings in [datetime_utils.py](datetime_utils/datetime_utils.py)
  and [datetime_testutils.py](datetime_utils/datetime_testutils.py).
-
----
 
 Local dir install
 -----------------

@@ -11,7 +11,6 @@ Usage
 
 See top docstring in [log_adapter.py](log_utils/log_adapter.py).
 
-
 Local dir install
 -----------------
 To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:
