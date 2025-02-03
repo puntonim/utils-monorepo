@@ -37,7 +37,7 @@ peewee_utils.register_tables(Activity)
 # Add a custom SQL function that serves as feature toggle for the updated_at triggers.
 #  It returns 1 (True) always and it's invoked by every updated_at trigger.
 #  We can overwrite this function to return 0 in order to temp disable triggers.
-#  See tests/testfactories/domains/exercise_domain_factory.py.
+#  See gymiq/tests/testfactories/domains/exercise_domain_factory.py.
 UPDATED_AT_TRIGGERS_TOGGLE_FUNCTION_NAME = "are_updated_at_triggers_enabled"
 peewee_utils.register_sql_function(
     lambda: 1,
