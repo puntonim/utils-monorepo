@@ -1,6 +1,6 @@
 """
 ** NUMBER UTILS **
-====================
+==================
 
 ```py
 import number_utils
@@ -9,15 +9,13 @@ number_utils.ordinal(5) -> "5th"
 ```
 """
 
-from datetime import datetime, time, timezone
+from decimal import Decimal
 
 # Objects exported to the `import *` in `__init__.py`.
 __all__ = [
     "count_decimal_digits",
     "ordinal",
 ]
-
-from decimal import Decimal
 
 
 def count_decimal_digits(n: float) -> int:
