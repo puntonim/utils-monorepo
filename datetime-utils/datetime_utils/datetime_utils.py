@@ -11,7 +11,7 @@ datetime_utils.now_utc()
 ```
 """
 
-from datetime import datetime, time, timezone
+from datetime import datetime, time, timedelta, timezone
 
 # Objects exported to the `import *` in `__init__.py`.
 __all__ = [
@@ -26,6 +26,7 @@ __all__ = [
     "shortest_format_date",
     "timestamp_to_utc_date",
     "utc_date_to_timestamp",
+    "seconds_to_hh_mm_ss",
 ]
 
 
@@ -147,3 +148,18 @@ def convert_all_isoformat_values_in_dict_to_datetime(data: dict):
         except (TypeError, ValueError) as exc:
             pass
     return data
+
+
+def seconds_to_hh_mm_ss(
+    seconds: int | float, do_use_min_2_digits_for_hours: bool = False
+) -> str:
+    """
+    Convert seconds to the format h:mm:ss.
+    Eg. datetime_utils.seconds_to_hh_mm_ss(1045) -> "0:17:25"
+        datetime_utils.seconds_to_hh_mm_ss(1045, do_use_min_2_digits_for_hours=True) -> "00:17:25"
+        datetime_utils.seconds_to_hh_mm_ss(9291045) -> "107 days, 12:50:45"
+    """
+    str_val = str(timedelta(seconds=seconds))
+    if do_use_min_2_digits_for_hours:
+        str_val = str_val.zfill(8)
+    return str_val

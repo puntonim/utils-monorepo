@@ -37,3 +37,17 @@ class TestDaysToGo:
     def test_negative(self):
         d = datetime(2020, 3, 3, 23, 59, 0).astimezone()
         assert datetime_utils.days_to_go(d) == -749.9
+
+
+class TestSecondsToHhMmSs:
+    def test_happy_flow(self):
+        assert datetime_utils.seconds_to_hh_mm_ss(1045) == "0:17:25"
+
+    def test_zero_filling(self):
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(1045, do_use_min_2_digits_for_hours=True)
+            == "00:17:25"
+        )
+
+    def test_long(self):
+        assert datetime_utils.seconds_to_hh_mm_ss(9291045) == "107 days, 12:50:45"
