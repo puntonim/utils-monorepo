@@ -20,6 +20,8 @@ __all__ = [
     "days_to_go",
     "is_naive",
     "iso_string_to_date",
+    "minpkm_base10_to_base60",
+    "mps_to_minpkm",
     "now",
     "now_utc",
     "short_format_date",
@@ -147,3 +149,22 @@ def convert_all_isoformat_values_in_dict_to_datetime(data: dict):
         except (TypeError, ValueError) as exc:
             pass
     return data
+
+
+def minpkm_base10_to_base60(x: float) -> str:
+    """
+    Eg. 5.05 min/km -> 5:03 min/km.
+        minpkm_base10_to_base60(5.05) -> "5:03".
+    """
+    int_val = floor(x)
+    dec_val = x - int_val
+    return f"{int_val}:{round(dec_val * 60):02d}"
+
+
+def mps_to_minpkm(x: float) -> float:
+    """
+    Eg. 3.3 m/s -> 5.05 min/km.
+        mps_to_minpkm(3.3) -> 5.05
+    Note that 5.05 min/km could then be converted to base60 to 5:03 min/km.
+    """
+    return 60 / (x * 3.6)
