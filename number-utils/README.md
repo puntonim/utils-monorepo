@@ -1,5 +1,5 @@
 **Utils monorepo: Number Utils**
-==================================
+================================
 
 Just some Python number utils.
 

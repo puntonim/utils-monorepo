@@ -1,7 +1,7 @@
-**Utils monorepo: Text Utils**
-==============================
+**Utils monorepo: Speed Utils**
+===============================
 
-Just some Python text utils.
+Just some Python speed utils.
 
 
 Usage
@@ -9,7 +9,7 @@ Usage
 
 ---
 
-See top docstrings in [text_utils.py](text_utils/text_utils.py).
+See top docstrings in [speed_utils.py](speed_utils/speed_utils.py).
 
 Local dir install
 -----------------
@@ -18,13 +18,13 @@ To install this client in a Poetry project, from a local dir, add this to `pypro
 [project]
 ...
 dependencies = [
-    "text-utils @ ../text-utils"
-    # "text-utils @ file:///Users/myuser/workspace/utils-monorepo/text-utils"
+    "speed-utils @ ../speed-utils"
+    # "speed-utils @ file:///Users/myuser/workspace/utils-monorepo/speed-utils"
 ]
 
 [tool.poetry.dependencies]
 # This section is required only when there are editable (develop = true) dependencies.
-text-utils = {develop = true}
+speed-utils = {develop = true}
 ```
 
 Github install
@@ -34,14 +34,14 @@ To install this client in a Poetry project, from Github, add this to `pyproject.
 [project]
 ...
 dependencies = [
-    "text-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=text-utils",
+    "speed-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=speed-utils",
 ]
 ```
 
 Pip install
 -----------
 ```sh
-$ pip install "text-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=text-utils"
+$ pip install "speed-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=speed-utils"
 ```
 
 
