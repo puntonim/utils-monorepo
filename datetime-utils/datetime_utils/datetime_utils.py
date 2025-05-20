@@ -11,7 +11,8 @@ datetime_utils.now_utc()
 ```
 """
 
-from datetime import datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone, tzinfo
+from zoneinfo import ZoneInfo
 
 # Objects exported to the `import *` in `__init__.py`.
 __all__ = [
@@ -19,15 +20,25 @@ __all__ = [
     "days_ago",
     "days_to_go",
     "is_naive",
-    "iso_string_to_date",
+    "iso_string_to_datetime",
     "now",
     "now_utc",
     "short_format_date",
     "shortest_format_date",
-    "timestamp_to_utc_date",
+    "timestamp_to_utc_datetime",
     "utc_date_to_timestamp",
     "seconds_to_hh_mm_ss",
+    "parse_datetime_arg",
+    "replace_timezone",
+    "convert_to_timezone",
+    "local_timezone",
+    "date_to_datetime",
+    "parse_date_arg",
 ]
+
+
+class _DEFAULT:
+    pass
 
 
 SECS_IN_1_DAY = 60 * 60 * 24
@@ -47,24 +58,32 @@ def now() -> datetime:
     return datetime.now().astimezone()
 
 
-def timestamp_to_utc_date(ts: int) -> datetime:
+def timestamp_to_utc_datetime(ts: int) -> datetime:
     return datetime.fromtimestamp(ts).astimezone(timezone.utc)
 
 
-def utc_date_to_timestamp(date: datetime) -> int:
-    return int(date.astimezone(timezone.utc).timestamp())
+def utc_date_to_timestamp(d: datetime) -> int:
+    return int(d.astimezone(timezone.utc).timestamp())
 
 
-def iso_string_to_date(text: str) -> datetime:
+def iso_string_to_datetime(text: str) -> datetime:
     """
     Examples:
-        iso_string_to_date("2024-02-06T17:20:32")
+        iso_string_to_datetime("2024-02-06T17:20:32")
         >>> datetime.datetime(2024, 2, 6, 17, 20, 32)
 
-        iso_string_to_date("2024-02-06T17:20:32Z")
+        iso_string_to_datetime("2024-02-06T17:20:32+00:00")
         >>> datetime.datetime(2024, 2, 6, 17, 20, 32, tzinfo=datetime.timezone.utc)
     """
     return datetime.fromisoformat(text)
+
+
+def date_to_datetime(d: date) -> datetime:
+    """
+    Convert a date to a datetime by adding the hour, min and secs set to 0 and the
+     local timezone.
+    """
+    return replace_timezone(datetime.combine(d, datetime.min.time()))
 
 
 def is_naive(d: datetime | time):
@@ -74,20 +93,184 @@ def is_naive(d: datetime | time):
     return False
 
 
-def short_format_date(date: datetime):
+def short_format_date(d: datetime) -> str:
     """
     Eg. 2023-09-02 15:36:03 GMT.
     """
-    return date.strftime("%Y-%m-%d %H:%M:%S %Z")
+    return d.strftime("%Y-%m-%d %H:%M:%S %Z")
 
 
-def shortest_format_date(date: datetime):
+def shortest_format_date(d: datetime) -> str:
     """
     Eg. 05/01/23 08:09.
     """
     # Convert to local timezone.
-    date = date.astimezone()
-    return date.strftime("%d/%m/%y %H:%M")
+    d = d.astimezone()
+    return d.strftime("%d/%m/%y %H:%M")
+
+
+def local_timezone() -> tzinfo:
+    """
+    trick: not easy to get the local timezone, so we extract it from now().
+    """
+    return now().tzinfo
+
+
+def convert_to_timezone(d: datetime, tz: ZoneInfo | None = None) -> datetime:
+    """
+    Convert the given datetime to a different timezone, adjusting the date and time
+     according to the offset between the orignal and the new timezone.
+    The given datetime can be naive.
+
+    Args:
+        d: a datetime. Naive or not.
+        tz: default: local timezone. eg. ZoneInfo("Europe/Rome")
+
+    Example:
+        d = datetime(2022, 5, 1, 0, 15, 0, tzinfo=ZoneInfo("Europe/Rome"))
+        r = datetime_utils.convert_to_timezone(d, ZoneInfo("America/New_York"))
+        assert r == datetime(
+            2022, 4, 30, 18, 15, 0, tzinfo=ZoneInfo("America/New_York")
+        )
+    """
+    return d.astimezone(tz)
+
+
+def replace_timezone(d: datetime, tz: ZoneInfo | _DEFAULT = _DEFAULT) -> datetime:
+    """
+    Replace the timezone in the given datetime.
+    IMP: it does NOT adjust date and time according to the offset between the original
+     and the new timezone.
+    The given datetime can be naive.
+    Note: use tz=None to make it naive.
+
+    Args:
+        d: a datetime. Naive or not.
+        tz: eg. ZoneInfo("Europe/Rome"). Default: local timezone. None to make it naive.
+
+    Example:
+        d = datetime(2022, 5, 1, 0, 15, 0, tzinfo=ZoneInfo("Europe/Rome"))
+        r = datetime_utils.replace_timezone(d, ZoneInfo("America/New_York"))
+        assert r == datetime(2022, 5, 1, 0, 15, 0, tzinfo=ZoneInfo("America/New_York"))
+    """
+    if tz == _DEFAULT:
+        # If the timezone was not given, then use the local timezone.
+        # Trick: we get the local timezone with now().
+        tz = local_timezone()
+    # Note: use tzinfo=None to make it naive.
+    return d.replace(tzinfo=tz)
+
+
+def parse_date_arg(
+    value: date | datetime | str | None = None,
+    is_type_date_allowed: bool = True,
+    is_type_datetime_allowed: bool = True,
+    is_type_str_allowed: bool = True,
+    is_type_none_allowed: bool = True,
+) -> date | None:
+    """
+    Parse a date arg as string or date or datetime.
+    The typical use case is the parsing of a function argument.
+
+    Args:
+        value: the arg value.
+        is_type_date_allowed: True to allow a date like date(2024, 1, 6).
+        is_type_datetime_allowed: True to allow a datetime like datetime(2024, 1, 6, 17, 20, tzinfo=ZoneInfo("Europe/Rome")).
+        is_type_str_allowed: True to allow a string like "2024-01-01" or "2024-01-01T00:00:01+01:00".
+        is_type_none_allowed: True of the args is optional, so it can be None.
+
+    Returns: a date instance or None if is_type_none_allowed is True and value is None.
+
+    Example:
+        r = datetime_utils.parse_date_arg("2024-01-01")
+        assert r == date(2024, 1, 1)
+    """
+    if value is None:
+        if is_type_none_allowed:
+            return None
+        else:
+            raise DateRequired(value)
+
+    elif isinstance(value, str) and is_type_str_allowed:
+        try:
+            value: date = iso_string_to_datetime(value).date()
+        except ValueError as exc:
+            raise InvalidDate(value) from exc
+        return value
+
+    elif isinstance(value, datetime) and is_type_datetime_allowed:
+        return value.date()
+
+    elif (
+        isinstance(value, date)
+        # `not isinstance(value, datetime)` is required because every datetime instance
+        #   is also a date instance (the opposite is not true).
+        and not isinstance(value, datetime)
+        and is_type_date_allowed
+    ):
+        return value
+
+    raise InvalidDate(value)
+
+
+def parse_datetime_arg(
+    value: datetime | date | str | None = None,
+    is_type_datetime_allowed: bool = True,
+    is_type_date_allowed: bool = True,
+    is_type_str_allowed: bool = True,
+    is_type_none_allowed: bool = True,
+    is_naive_allowed: bool = False,
+) -> datetime | None:
+    """
+    Parse a datetime arg as string or datetime or date.
+    The typical use case is the parsing of a function argument.
+
+    Args:
+        value: the arg value.
+        is_type_datetime_allowed: True to allow a datetime like datetime(2024, 1, 6, 17, 20, tzinfo=ZoneInfo("Europe/Rome")).
+        is_type_date_allowed: True to allow a date like date(2024, 1, 6).
+        is_type_str_allowed: True to allow a string like "2024-01-01T00:00:01+01:00".
+        is_type_none_allowed: True of the args is optional, so it can be None.
+        is_naive_allowed: True to allow a naive datetime value.
+
+    Returns: a datetime instance or None if is_type_none_allowed is True and value is None.
+
+    Example:
+        r = datetime_utils.parse_datetime_arg("2024-01-01T00:00:01+01:00")
+        assert r == datetime(
+            2024, 1, 1, 0, 0, 1, tzinfo=timezone(timedelta(seconds=3600))
+        )
+    """
+    if value is None:
+        if is_type_none_allowed:
+            return None
+        else:
+            raise DatetimeRequired(value)
+
+    elif isinstance(value, str) and is_type_str_allowed:
+        try:
+            value: datetime = iso_string_to_datetime(value)
+        except ValueError as exc:
+            raise InvalidDatetime(value) from exc
+        if not is_naive_allowed and is_naive(value):
+            raise NaiveDatetime(value)
+        return value
+
+    elif isinstance(value, datetime) and is_type_datetime_allowed:
+        if not is_naive_allowed and is_naive(value):
+            raise NaiveDatetime(value)
+        return value
+
+    elif (
+        isinstance(value, date)
+        # `not isinstance(value, datetime)` is required because every datetime instance
+        #   is also a date instance (the opposite is not true).
+        and not isinstance(value, datetime)
+        and is_type_date_allowed
+    ):
+        return date_to_datetime(value)
+
+    raise InvalidDatetime(value)
 
 
 def days_ago(d: datetime, n_decimal_digits: int = 1):
@@ -99,7 +282,7 @@ def days_ago(d: datetime, n_decimal_digits: int = 1):
         4.10828
     """
     if is_naive(d):
-        raise TypeError("Naive datetime not supported")
+        raise NaiveDatetime(d)
     return round((now_utc() - d).total_seconds() / SECS_IN_1_DAY, n_decimal_digits)
 
 
@@ -112,7 +295,7 @@ def days_to_go(d: datetime, n_decimal_digits: int = 1):
         4.10828
     """
     if is_naive(d):
-        raise TypeError("Naive datetime not supported")
+        raise NaiveDatetime(d)
     return round((d - now_utc()).total_seconds() / SECS_IN_1_DAY, n_decimal_digits)
 
 
@@ -163,3 +346,30 @@ def seconds_to_hh_mm_ss(
     if do_use_min_2_digits_for_hours:
         str_val = str_val.zfill(8)
     return str_val
+
+
+class BaseDatetimeUtilsException(Exception):
+    pass
+
+
+class DatetimeRequired(BaseDatetimeUtilsException):
+    pass
+
+
+class DateRequired(BaseDatetimeUtilsException):
+    pass
+
+
+class InvalidDatetime(BaseDatetimeUtilsException):
+    def __init__(self, value):
+        self.value = value
+
+
+class InvalidDate(BaseDatetimeUtilsException):
+    def __init__(self, value):
+        self.value = value
+
+
+class NaiveDatetime(BaseDatetimeUtilsException):
+    def __init__(self, value):
+        self.value = value
