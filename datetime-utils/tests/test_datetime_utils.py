@@ -53,14 +53,116 @@ class TestSecondsToHhMmSs:
     def test_happy_flow(self):
         assert datetime_utils.seconds_to_hh_mm_ss(1045) == "0:17:25"
 
-    def test_zero_filling(self):
+    def test_1_digit(self):
+        s = 5
+        assert datetime_utils.seconds_to_hh_mm_ss(s) == "0:00:05"
         assert (
-            datetime_utils.seconds_to_hh_mm_ss(1045, do_use_min_2_digits_for_hours=True)
-            == "00:17:25"
+            datetime_utils.seconds_to_hh_mm_ss(s, do_use_leading_zero_fill=True)
+            == "00:00:05"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_hide_hours_and_mins_if_zero=True)
+            == "5"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "05"
+        )
+
+    def test_2_digits(self):
+        s = 55
+        assert datetime_utils.seconds_to_hh_mm_ss(s) == "0:00:55"
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_use_leading_zero_fill=True)
+            == "00:00:55"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_hide_hours_and_mins_if_zero=True)
+            == "55"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "55"
+        )
+
+    def test_3_digits(self):
+        s = 65
+        assert datetime_utils.seconds_to_hh_mm_ss(s) == "0:01:05"
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_use_leading_zero_fill=True)
+            == "00:01:05"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_hide_hours_and_mins_if_zero=True)
+            == "1:05"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "01:05"
+        )
+
+    def test_4_digits(self):
+        s = 665
+        assert datetime_utils.seconds_to_hh_mm_ss(s) == "0:11:05"
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_use_leading_zero_fill=True)
+            == "00:11:05"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_hide_hours_and_mins_if_zero=True)
+            == "11:05"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "11:05"
+        )
+
+    def test_5_digits(self):
+        s = 3665
+        assert datetime_utils.seconds_to_hh_mm_ss(s) == "1:01:05"
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_use_leading_zero_fill=True)
+            == "01:01:05"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_hide_hours_and_mins_if_zero=True)
+            == "1:01:05"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "01:01:05"
+        )
+
+    def test_6_digits(self):
+        s = 36065
+        assert datetime_utils.seconds_to_hh_mm_ss(s) == "10:01:05"
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_use_leading_zero_fill=True)
+            == "10:01:05"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(s, do_hide_hours_and_mins_if_zero=True)
+            == "10:01:05"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "10:01:05"
         )
 
     def test_long(self):
-        assert datetime_utils.seconds_to_hh_mm_ss(9291045) == "107 days, 12:50:45"
+        assert datetime_utils.seconds_to_hh_mm_ss(9251445) == "107 days, 1:50:45"
 
 
 class TestReplaceTimezone:

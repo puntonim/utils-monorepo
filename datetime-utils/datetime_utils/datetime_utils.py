@@ -334,17 +334,59 @@ def convert_all_isoformat_values_in_dict_to_datetime(data: dict):
 
 
 def seconds_to_hh_mm_ss(
-    seconds: int | float, do_use_min_2_digits_for_hours: bool = False
+    seconds: int | float,
+    do_use_leading_zero_fill: bool = False,
+    do_hide_hours_and_mins_if_zero: bool = False,
 ) -> str:
     """
     Convert seconds to the format h:mm:ss.
-    Eg. datetime_utils.seconds_to_hh_mm_ss(1045) -> "0:17:25"
-        datetime_utils.seconds_to_hh_mm_ss(1045, do_use_min_2_digits_for_hours=True) -> "00:17:25"
-        datetime_utils.seconds_to_hh_mm_ss(9291045) -> "107 days, 12:50:45"
+    Eg. datetime_utils.seconds_to_hh_mm_ss(5)    -> "0:00:05"
+        datetime_utils.seconds_to_hh_mm_ss(
+            5,
+            do_use_leading_zero_fill=True)       -> "00:00:05"
+        datetime_utils.seconds_to_hh_mm_ss(
+            5,
+            do_hide_hours_and_mins_if_zero=True) -> "5"
+        datetime_utils.seconds_to_hh_mm_ss(
+            5,
+            do_use_leading_zero_fill=True,
+            do_hide_hours_and_mins_if_zero=True) -> "05"
+        datetime_utils.seconds_to_hh_mm_ss(9251445) -> "107 days, 1:50:45"
     """
     str_val = str(timedelta(seconds=seconds))
-    if do_use_min_2_digits_for_hours:
-        str_val = str_val.zfill(8)
+
+    if do_use_leading_zero_fill:
+        # Possible cases:
+        #  1:01:05 -> 01:01:05
+        #  0:01:05 -> 00:01:05
+        #  0:00:05 -> 00:00:05
+        if str_val.find(":") == 1:
+            str_val = "0" + str_val
+
+    if do_hide_hours_and_mins_if_zero:
+        # Possible cases:
+        #  1:01:05 or 01:01:05 -> no change
+        #  0:01:05 or 00:01:05 -> 01:05
+        #  0:00:05 or 00:00:05 -> 05
+        while str_val.startswith("0:") or str_val.startswith("00:"):
+            if str_val.startswith("0:"):
+                str_val = str_val[2:]
+            elif str_val.startswith("00:"):
+                str_val = str_val[3:]
+
+    if not do_use_leading_zero_fill:
+        # Possible cases:
+        #  1:01:05 or 01:01:05 -> no change, already handled in the prev `if do_use_leading_zero_fill`.
+        #  0:01:05 -> no change
+        #  00:01:05 or 01:05 -> 0:01:05, 1:05
+        #  0:00:05 -> no change
+        #  00:00:05 or 05 -> 0:00:05, 5
+        if str_val.startswith("0"):
+            if str_val.find(":") == 2:
+                str_val = str_val[1:]
+            elif ":" not in str_val:
+                str_val = str_val[1:]
+
     return str_val
 
 
