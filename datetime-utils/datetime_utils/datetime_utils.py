@@ -28,6 +28,7 @@ __all__ = [
     "timestamp_to_utc_datetime",
     "utc_date_to_timestamp",
     "seconds_to_hh_mm_ss",
+    "seconds_to_hh_mm",
     "parse_datetime_arg",
     "replace_timezone",
     "convert_to_timezone",
@@ -340,6 +341,7 @@ def seconds_to_hh_mm_ss(
 ) -> str:
     """
     Convert seconds to the format h:mm:ss.
+
     Eg. datetime_utils.seconds_to_hh_mm_ss(5)    -> "0:00:05"
         datetime_utils.seconds_to_hh_mm_ss(
             5,
@@ -387,6 +389,50 @@ def seconds_to_hh_mm_ss(
             elif ":" not in str_val:
                 str_val = str_val[1:]
 
+    return str_val
+
+
+def seconds_to_hh_mm(
+    seconds: int | float,
+    do_use_leading_zero_fill: bool = False,
+    do_hide_hours_and_mins_if_zero: bool = False,
+) -> str:
+    """
+    Convert seconds to the format h:mm.
+    If seconds are > 30 then it rounds the min to the next one.
+
+    Eg. datetime_utils.seconds_to_hh_mm(1045)    -> "0:17"  # Approx of "0:17:25".
+        datetime_utils.seconds_to_hh_mm(1051)    -> "0:18"  # Approx of "0:17:31".
+        datetime_utils.seconds_to_hh_mm(5)       -> "0:00"
+        datetime_utils.seconds_to_hh_mm(
+            5,
+            do_use_leading_zero_fill=True)       -> "00:00"
+        datetime_utils.seconds_to_hh_mm(
+            5,
+            do_hide_hours_and_mins_if_zero=True) -> "0"
+        datetime_utils.seconds_to_hh_mm(
+            5,
+            do_use_leading_zero_fill=True,
+            do_hide_hours_and_mins_if_zero=True) -> "00"
+        datetime_utils.seconds_to_hh_mm(9251445) -> "107 days, 1:51"  # Approx of "107 days, 1:50:45".
+    """
+    str_val = seconds_to_hh_mm_ss(
+        seconds, do_use_leading_zero_fill, do_hide_hours_and_mins_if_zero
+    )
+    last_col_ix = str_val.rfind(":")
+
+    # If the seconds are > 30 then we round the min to the next one (by adding 31 secs).
+    secs = int(str_val[last_col_ix + 1 :])
+    if secs > 30:
+        return seconds_to_hh_mm(
+            seconds + 31, do_use_leading_zero_fill, do_hide_hours_and_mins_if_zero
+        )
+
+    if last_col_ix > 0:
+        str_val = str_val[:last_col_ix]
+    else:
+        # There are only seconds.
+        str_val = "0" if not do_use_leading_zero_fill else "00"
     return str_val
 
 

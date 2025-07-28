@@ -165,6 +165,160 @@ class TestSecondsToHhMmSs:
         assert datetime_utils.seconds_to_hh_mm_ss(9251445) == "107 days, 1:50:45"
 
 
+class TestSecondsToHhMm:
+    def test_happy_flow(self):
+        assert datetime_utils.seconds_to_hh_mm(1045) == "0:17"  # Approx of "0:17:25".
+
+    def test_rounding(self):
+        assert datetime_utils.seconds_to_hh_mm(1050) == "0:17"  # Approx of "0:17:30".
+        assert datetime_utils.seconds_to_hh_mm(1051) == "0:18"  # Approx of "0:17:31".
+        assert datetime_utils.seconds_to_hh_mm(1079) == "0:18"  # Approx of "0:17:59".
+        assert datetime_utils.seconds_to_hh_mm(1080) == "0:18"  # Approx of "0:18:00".
+
+    def test_1_digit(self):
+        s = 5
+        assert datetime_utils.seconds_to_hh_mm(s) == "0:00"
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_use_leading_zero_fill=True) == "00:00"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_hide_hours_and_mins_if_zero=True)
+            == "0"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "00"
+        )
+
+    def test_2_digits_and_rounding(self):
+        s = 25
+        assert datetime_utils.seconds_to_hh_mm(s) == "0:00"
+        assert datetime_utils.seconds_to_hh_mm(s + 10) == "0:01"
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_use_leading_zero_fill=True) == "00:00"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s + 10, do_use_leading_zero_fill=True)
+            == "00:01"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_hide_hours_and_mins_if_zero=True)
+            == "0"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s + 10, do_hide_hours_and_mins_if_zero=True)
+            == "1"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "00"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                s + 10,
+                do_use_leading_zero_fill=True,
+                do_hide_hours_and_mins_if_zero=True,
+            )
+            == "01"
+        )
+
+    def test_3_digits(self):
+        s = 65
+        assert datetime_utils.seconds_to_hh_mm(s) == "0:01"
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_use_leading_zero_fill=True) == "00:01"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_hide_hours_and_mins_if_zero=True)
+            == "1"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "01"
+        )
+
+    def test_4_digits(self):
+        s = 665
+        assert datetime_utils.seconds_to_hh_mm(s) == "0:11"
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_use_leading_zero_fill=True) == "00:11"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_hide_hours_and_mins_if_zero=True)
+            == "11"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "11"
+        )
+
+    def test_5_digits(self):
+        s = 3665
+        assert datetime_utils.seconds_to_hh_mm(s) == "1:01"
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_use_leading_zero_fill=True) == "01:01"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_hide_hours_and_mins_if_zero=True)
+            == "1:01"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "01:01"
+        )
+
+    def test_6_digits_and_rounding(self):
+        s = 36065
+        assert datetime_utils.seconds_to_hh_mm(s) == "10:01"  # Approx of "10:01:05".
+        assert (
+            datetime_utils.seconds_to_hh_mm(s + 30) == "10:02"  # Approx of "10:01:35".
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_use_leading_zero_fill=True) == "10:01"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s + 30, do_use_leading_zero_fill=True)
+            == "10:02"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s, do_hide_hours_and_mins_if_zero=True)
+            == "10:01"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(s + 30, do_hide_hours_and_mins_if_zero=True)
+            == "10:02"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                s, do_use_leading_zero_fill=True, do_hide_hours_and_mins_if_zero=True
+            )
+            == "10:01"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                s + 30,
+                do_use_leading_zero_fill=True,
+                do_hide_hours_and_mins_if_zero=True,
+            )
+            == "10:02"
+        )
+
+    def test_long(self):
+        assert (
+            datetime_utils.seconds_to_hh_mm(9251445) == "107 days, 1:51"
+        )  # Approx of "107 days, 1:50:45".
+
+
 class TestReplaceTimezone:
     def test_happy_flow(self):
         d = datetime(2022, 5, 1, 0, 15, 0, tzinfo=ZoneInfo("Europe/Rome"))
