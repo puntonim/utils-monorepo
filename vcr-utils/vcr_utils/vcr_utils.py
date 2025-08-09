@@ -1,10 +1,17 @@
 """
-@stub_player decorator is a sort of vcr.py for non-HTTP network interactions.
-A typical use case is recording/replaying the interactions with another local
- process via socket connection.
+** VCR UTILS **
+====================
 
-You can see an example in the unit tests here: tests/testutils/stub_player/test_tws_api_client.py.
-Or an actual usage in tws-api-client in patatrack-monorepo.
+Like [VCR.py](https://vcrpy.readthedocs.io/) but not limited to HTTP interactions.
+Instead, it stubs an entire function/method (via pickle) and replays it back later.
+
+So it can be used when unit testing software that makes local socket or Websocket or TCP
+ connections. Or literally anything else, since what's stubbed is a Python
+ function/method, not a connection.
+
+You can see an example in the unit tests in this package.
+Or an actual usage in tws-api-client (local socket) or tradingview-client (Websocket)
+ in patatrack-monorepo.
 
 Example
 -------
@@ -17,19 +24,20 @@ class TwsApiClient:
         # This is the public method used by the consumer.
         raw_trades = self.get_raw_trades()
 
-        # TODO do something with the raw_trades: typically use a Pydantic schema to
-        #  validate and return those schema.
+        # TODO do something with the raw_trades: typically validate the returned data,
+        #   or catch exceptions and re-raise custom exceptions.
 
         return raw_trades
 
     def get_raw_trades(self) -> list[dict]:
-        # In order to use @stub_player you always have to define a method that handles
-        #  only the socket request to the local process.
+        # In order to use @vcr_utils you always have to define a method that handles
+        #  only the behavior to be stubbed, in this case the local socket request to
+        #  the local process.
         # There should be no code here apart from just making the socket request.
-        # It's the method that will be mocked by @stub_player in unit tests.
+        # It's the method that will be stubbed by @vcr_utils in unit tests.
 
         # TODO simulating the socket request and pretending it returns a dict.
-        # raw_trades = socket connection and request .....
+        # raw_trades = local socket connection and request .....
         raw_trades = [
             dict(symbol="AAPL", quantity=2, avg_price=100.15),
             dict(symbol="NVDA", quantity=-5, avg_price=324.08),
@@ -40,11 +48,11 @@ class TwsApiClient:
 
 This is how you would test it:
 ```py
-from patatrack_utils.testutils.stub_player import stub_player
+from vcr_utils import vcr_utils
 from mylib.tws_api_client import TwsApiClient
 
 class TestTwsApiClient:
-    @stub_player(
+    @vcr_utils(
         "mylib.tws_api_client.TwsApiClient.get_raw_trades"
     )
     def test_happy_flow(self):
@@ -62,12 +70,27 @@ import pickle
 from pathlib import Path
 from unittest.mock import _get_target, patch
 
-from .. import settings_utils
+# Objects exported to the `import *` in `__init__.py`.
+__all__ = ["vcr_utils"]
 
 
-def stub_player(str_callable_to_be_stubbed):
+class _DEFAULT:
+    pass
+
+
+def _get_bool_from_env(key: str, default: bool | None = _DEFAULT):
+    # Src: https://github.com/puntonim/utils-monorepo/blob/main/settings-utils/settings_utils/settings_utils.py
+    value = os.getenv(key, "").lower().strip()
+    if not value:
+        if default == _DEFAULT:
+            raise KeyError
+        return default
+    return value in ("true", "yes", "t", "y")
+
+
+def vcr_utils(str_callable_to_be_stubbed):
     """
-    Decorator @stub_player to be used to record/replay the stub for the given
+    Decorator @vcr_utils to be used to record/replay the stub for the given
      function/method.
     Use it to decorate unit tests functions/methods only.
 
@@ -105,7 +128,7 @@ def stub_player(str_callable_to_be_stubbed):
         # Path of the cassette (.pickle file).
         cassette_file = cassette_dir / (cur_test_fn.__qualname__ + ".pickle")
 
-        is_record_mode = settings_utils.get_bool_from_env("DO_RECORD_STUBS", False)
+        is_record_mode = _get_bool_from_env("DO_RECORD_STUBS", False)
 
         if is_record_mode:
             # Run the original func/method, pickle the result and store it in the
@@ -149,11 +172,11 @@ def stub_player(str_callable_to_be_stubbed):
     return wrapper
 
 
-class BaseStubPlayerException(Exception):
+class BaseVcrUtilsException(Exception):
     pass
 
 
-class CassetteNotFound(BaseStubPlayerException):
+class CassetteNotFound(BaseVcrUtilsException):
     def __init__(self, path):
         super().__init__("Use DO_RECORD_STUBS=y to record new stubs")
         self.path = path
