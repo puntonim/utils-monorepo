@@ -14,6 +14,10 @@ See top docstring in [peewee_utils.py](peewee_utils/peewee_utils.py).
 Local dir install
 -----------------
 To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:
+```sh
+$ poetry add ../peewee-utils
+```
+or:
 ```toml
 [project]
 ...
@@ -30,6 +34,10 @@ peewee-utils = {develop = true}
 Github install
 --------------
 To install this client in a Poetry project, from Github, add this to `pyproject.toml`:
+```sh
+$ poetry add git+https://github.com/puntonim/utils-monorepo#subdirectory=peewee-utils
+```
+or:
 ```toml
 [project]
 ...
