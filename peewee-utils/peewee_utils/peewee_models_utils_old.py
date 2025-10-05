@@ -1,10 +1,15 @@
+"""
+*IMP: this is the **OLD** version of peewee-utils. The new version is in
+ peeweemodels__utils.py. Use this module in old code only. I prefer not to use
+ versioning in order to keep things simple.*
+"""
+
 from datetime import datetime, timezone
 from typing import get_type_hints
 
 import peewee
-from playhouse import sqlite_ext
 
-from .peewee_utils import _DATABASE_PROXY
+from .peewee_utils_old import _database_proxy
 
 # Objects exported to the `import *` in `__init__.py`.
 __all__ = [
@@ -12,17 +17,12 @@ __all__ = [
     "NotADatetime",
     "NaiveDatetime",
     "UtcDateTimeField",
-    "BaseFtsModelModel",
 ]
 
 
 class IntrospectablePeeweeModel:
     def to_dict(self) -> dict:
         return self.__data__
-
-    @classmethod
-    def get_table_name(cls) -> dict:
-        return cls._meta.table_name
 
     @classmethod
     def get_fields(cls) -> dict:
@@ -33,35 +33,12 @@ class IntrospectablePeeweeModel:
         return get_type_hints(cls)  # Or: cls.__annotations__.
 
 
-def _make_table_name(model_instance):
-    """
-    Cuts the postfix "_model" from the name generated from the Python class.
-    """
-    # `peewee.make_snake_case()` is how Peewee makes the table names (non-legacy).
-    model_name: str = peewee.make_snake_case(model_instance.__name__)
-    if model_name.endswith("_model"):
-        model_name = model_name[:-6]
-    return model_name.lower()
-
-
 class BasePeeweeModel(peewee.Model, IntrospectablePeeweeModel):
     class Meta:
-        database = _DATABASE_PROXY
+        database = _database_proxy
         # `legacy_table_names` defaults to False as of Peewee 4.0.
         # https://docs.peewee-orm.com/en/latest/peewee/models.html#table-names
         legacy_table_names = False
-        table_function = _make_table_name
-
-    def __str__(self) -> str:
-        return self.__repr__()
-
-
-class BaseFtsModelModel(sqlite_ext.FTS5Model, IntrospectablePeeweeModel):
-    class Meta:
-        database = _DATABASE_PROXY
-
-    def __str__(self) -> str:
-        return self.__repr__()
 
 
 class BaseUtcDateTimeFieldException(Exception):

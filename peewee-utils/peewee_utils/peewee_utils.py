@@ -2,25 +2,23 @@
 ** PEEWEE UTILS **
 ==================
 
+*IMP: this is the **new** version of peewee-utils. The old version is in *_old.py.
+I prefer not to use versioning in order to keep things simple.*
+
 Used, among the others, in:
- - strava-monorepo/projects/strava-exporter-to-db: a simple CLI (without any
-    CLI framework).
- - strava-monorepo/libs/strava-db-models: Peewee models.
+ - sqlite-full-text-search in experiments-monorepo (GREAT EXAMPLE).
 
 Models definition
 -----------------
 First, define models in a `data_models.py` file:
 ```py
 from datetime import datetime
-
 import datetime_utils
 import peewee
 import peewee_utils
-
 from ..conf import settings
 
-
-class Activity(peewee_utils.BasePeeweeModel):
+class ActivityModel(peewee_utils.BasePeeweeModel):
     # The `id` would be implicitly added even of we comment this line, as we did
     #  not specify a primary key.
     id: int = peewee.AutoField()
@@ -30,9 +28,8 @@ class Activity(peewee_utils.BasePeeweeModel):
     updated_at: datetime = peewee_utils.UtcDateTimeField(default=datetime_utils.now_utc)
     name: str = peewee.CharField(max_length=512)
 
-
 # Register all tables.
-peewee_utils.register_tables(Activity)
+peewee_utils.register_tables(ActivityModel)
 
 # Add a custom SQL function that serves as feature toggle for the updated_at triggers.
 #  It returns 1 (True) always and it's invoked by every updated_at trigger.
@@ -45,7 +42,7 @@ peewee_utils.register_sql_function(
     0,
 )
 
-# Register a trigger to update Activity.updated_at on every update.
+# Register a trigger to update ActivityModel.updated_at on every update.
 # Update trigger: https://stackoverflow.com/questions/30780722/sqlite-and-recursive-triggers
 # STRFTIME for timestamp with milliseconds: https://stackoverflow.com/questions/17574784/sqlite-current-timestamp-with-milliseconds
 peewee_utils.register_trigger(
@@ -62,30 +59,85 @@ END;
 )
 
 # At last, configure peewee_utils with the SQLite DB path.
-peewee_utils.configure(sqlite_db_path=settings.SQLITE_DB_PATH)
+# Using lambda functions, instead of actual values, for lazy init, which is necessary
+#  when overriding settings in tests.
+peewee_utils.configure(
+    get_sqlite_db_path_fn=lambda: settings.DB_PATH,
+    get_do_log_peewee_queries_fn=lambda: settings.DO_LOG_PEEWEE_QUERIES,
+    get_load_extensions_fn=lambda: (settings.SQLITE_EXT_SNOWBALL_MACOS_PATH,),
+)
 ```
 
 Functions/methods that require access to DB
 -------------------------------------------
-Then decorate with `@peewee_utils.use_db` any function/method that requires access
- to the DB:
+Then use the decorator and ctx manager `peewee_utils.use_db()` with any function/method
+ or snippet that requires access to the DB:
 ```py
 import peewee_utils
-from .importer_from_strava_api_to_db import db_models
 
-@peewee_utils.use_db
-def main():
-    query = db_models.Activity.select().where(db_models.Activity.name == "myname")
-    assert query.count() == 1
+@peewee_utils.use_db()
+def count():
+    query = db_models.ActivityModel.select().where(db_models.ActivityModel.name == "myname")
+    return query.count()
+
+def count():
+    with @peewee_utils.use_db():
+        query = db_models.ActivityModel.select().where(db_models.ActivityModel.name == "myname")
+        return query.count()
+```
+
+Tests
+-----
+See tests in sqlite-full-text-search in experiments-monorepo.
+
+In `conftest.py`:
+```py
+import peewee_utils
+import pytest
+import settings_utils
+from fts_exp.conf.settings import settings, test_settings
+
+@pytest.fixture(autouse=True, scope="function")
+def test_settings_fixture(monkeypatch, request):
+    # Copy all test settings to settings.
+    settings_utils.copy_settings(test_settings, settings)
+
+@pytest.fixture(autouse=True, scope="function")
+def use_db_fixture(test_settings_fixture):
+    # `do_force_new_db_init` is required when running concurrent tests with in-memory
+    #  SQLite db.
+    with peewee_utils.use_db(do_force_new_db_init=True):
+        yield
+```
+
+Then write tests like this:
+```py
+class TestItemModel:
+    def test_create(self):
+        assert ItemModel.select().count() == 0
+        ItemModel.create(title="My first title", notes="My first note")
+        ItemModel.create(title="My second title", notes="My second note")
+        assert ItemModel.select().count() == 2
+
+    def test_db_isolation(self):
+        # It's intentionally the same as the prev test. The purpose is to ensure that
+        #  single tests isolation works and the 2 items inserted in the prev tests are
+        #  gone.
+        assert ItemModel.select().count() == 0
+        ItemModel.create(title="My first title", notes="My first note")
+        ItemModel.create(title="My second title", notes="My second note")
+        assert ItemModel.select().count() == 2
 ```
 """
 
 import functools
 import sys
 import uuid
+from contextlib import ContextDecorator
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from pathlib import Path
+from typing import Any, Callable, Sequence
 
 import log_utils as logger
 import peewee
@@ -95,7 +147,7 @@ from playhouse.pool import PooledSqliteDatabase
 # Objects exported to the `import *` in `__init__.py`.
 __all__ = [
     "configure",
-    "db",
+    "get_db",
     "create_all_tables",
     "drop_all_tables",
     "use_db",
@@ -103,6 +155,7 @@ __all__ = [
     "register_tables",
     "register_trigger",
     "register_sql_function",
+    "print_compile_options",
 ]
 
 _TABLE_MODELS = []
@@ -110,17 +163,25 @@ _TRIGGERS_SQL = []
 _SQL_FUNCTIONS = []
 
 _CONFIG = {
-    "sqlite_db_path": ":memory:",
-    "do_log_peewee_queries": False,
+    "get_sqlite_db_path_fn": lambda: ":memory:",
+    "get_do_log_peewee_queries_fn": lambda: False,
+    "get_load_extensions_fn": lambda: None,
 }
 
+_DATABASE_PROXY = peewee.DatabaseProxy()
+_DB: PooledSqliteDatabase | None = None
 
-def configure(sqlite_db_path: str = ":memory:", do_log_peewee_queries: bool = False):
-    global _CONFIG
-    _CONFIG["sqlite_db_path"] = sqlite_db_path
-    _CONFIG["do_log_peewee_queries"] = do_log_peewee_queries
 
-    if do_log_peewee_queries:
+def configure(
+    get_sqlite_db_path_fn: Callable[[], str] = lambda: ":memory:",
+    get_do_log_peewee_queries_fn: Callable[[], bool] = lambda: False,
+    get_load_extensions_fn: Callable[[], Sequence[str | Path] | None] = lambda: None,
+):
+    _CONFIG["get_sqlite_db_path_fn"] = get_sqlite_db_path_fn
+    _CONFIG["get_do_log_peewee_queries_fn"] = get_do_log_peewee_queries_fn
+    _CONFIG["get_load_extensions_fn"] = get_load_extensions_fn
+
+    if get_do_log_peewee_queries_fn():
         # Log all queries to stderr.
         # Doc: https://docs.peewee-orm.com/en/latest/peewee/database.html#logging-queries
 
@@ -131,29 +192,23 @@ def configure(sqlite_db_path: str = ":memory:", do_log_peewee_queries: bool = Fa
         peewee_logger.setLevel(logging.DEBUG)
 
 
-_database_proxy = peewee.DatabaseProxy()
-# `db` is lazily computed, see `__getattr__()`.
-db: PooledSqliteDatabase | None = None
+def get_db(do_force_new_db_init: bool = False) -> PooledSqliteDatabase:
+    """
+    Get the db connection, an instance of PooledSqliteDatabase.
 
-
-def __getattr__(name: str) -> Any:
-    # Lazy init of the `db` module var: https://stackoverflow.com/a/52359211.
-    # From Python docs: """The __getattr__ function at the module level should accept
-    #  one argument which is the name of an attribute and return the computed value or
-    #  raise an AttributeError. If an attribute is not found on a module object through
-    #  the normal lookup, i.e. object.__getattribute__(), then __getattr__ is searched
-    #  in the module __dict__ before raising an AttributeError."""
-
-    if name == "db":
-        if db is None:
-            _db_init()
-        return db
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    Args:
+        do_force_new_db_init: useful in tests, when running concurrent tests with
+         in-memory SQLite db. See sqlite-full-test-search in experiments-monorepo.
+    """
+    # Lazy init of the db connection.
+    # The lazy init is useful, for examples, when overriding settings in tests.
+    if _DB is None or do_force_new_db_init:
+        _db_init()
+    return _DB
 
 
 def _db_init():
-    global _CONFIG
-    sqlite_db_path = _CONFIG["sqlite_db_path"]
+    sqlite_db_path = _CONFIG["get_sqlite_db_path_fn"]()
     # Note: sqlite_db_path gets stored in `db.database`.
     logger.info(f"Using DB {sqlite_db_path} ...")
 
@@ -169,15 +224,35 @@ def _db_init():
     #  for prod and test to use diff databases (eg. SQLite and PostgreSQL). For the same
     #  use case, you can also use a proxy:
     #  https://docs.peewee-orm.com/en/latest/peewee/database.html#dynamically-defining-a-database
-    global db
-    db = connect(
+    global _DB
+    _DB = connect(  # PooledSqliteDatabase.
         f"sqlite+pool:///{sqlite_db_path}{pool_config}",
         # Disable PRAGMA `recursive_triggers` because we defined a trigger to handle
         #  `updated_at` (btw the default value is OFF).
         pragmas={"foreign_keys": "ON", "recursive_triggers": "OFF"},
         autoconnect=False,  # Best practice.
     )
-    _database_proxy.initialize(db)
+    _DATABASE_PROXY.initialize(_DB)
+
+    # Load SQLite extensions.
+    for ext in _CONFIG["get_load_extensions_fn"]() or tuple():
+        ext: str | Path
+        _load_sqlite_extension(_DB, ext)
+
+
+def _load_sqlite_extension(_db, path: str | Path):
+    """
+    Load a loadable extension into SQLite.
+
+    The extension should have been compiled for the current architecture (eg. macos).
+    And SQLite should have been compiled with the loadable extensions enabled.
+    See notes in my laptop in _SW, SYS ENGINEERING/DB, NOSQL (PostgreSQL, Redis, MongoDB, ...)/SQLite/SQLite extensions and compile options.md.
+    """
+    try:
+        _db.enable_load_extension(True)
+    except AttributeError:
+        pass
+    _db.load_extension(str(path))
 
 
 def create_all_tables():
@@ -186,8 +261,7 @@ def create_all_tables():
     In a real-case project use migrations instead:
      https://docs.peewee-orm.com/en/latest/peewee/playhouse.html#schema-migrations
     """
-    # Trick to invoke the lazy init of `db` within this module.
-    db = __getattr__("db")
+    db = get_db()
 
     # Open the connection.
     logger.info("Opening DB connection")
@@ -212,8 +286,7 @@ def create_all_tables():
 
 
 def drop_all_tables():
-    # Trick to invoke the lazy init of `db` within this module.
-    db = __getattr__("db")
+    db = get_db()
 
     # Open the connection.
     logger.info("Opening DB connection")
@@ -227,27 +300,53 @@ def drop_all_tables():
     db.execute_sql("PRAGMA foreign_keys = ON;")
 
 
-def use_db(fn):
-    @functools.wraps(fn)
-    def closure(*fn_args, **fn_kwargs):
-        # Open DB connection and create all tables.
-        # db.connect(reuse_if_open=True)  # Opened by `create_all_tables()`.
-        create_all_tables()
+# Note: decorator to be used with ().
+class use_db(ContextDecorator):
+    """
+    Context manager and decorator.
 
-        # Invoke original function.
-        return_value = fn(*fn_args, **fn_kwargs)
+    Examples:
+        import peewee_utils
 
-        # Trick to invoke the lazy init of `db` within this module.
-        db = __getattr__("db")
-        # Close the connection to the DB.
-        # Do not close it here in test (check `conftest.py` instead).
-        if not db.is_closed() and not "pytest" in sys.modules:
-            logger.info("Closing DB connection")
-            db.close()
+        @peewee_utils.use_db()  <-- as decorator.
+        def count():
+            query = db_models.ActivityModel.select().where(db_models.ActivityModel.name == "myname")
+            return query.count()
 
-        return return_value
+        def count():
+            with @peewee_utils.use_db():  <-- as ctx manager.
+                query = db_models.ActivityModel.select().where(db_models.ActivityModel.name == "myname")
+                return query.count()
+    """
 
-    return closure
+    def __init__(self, do_force_new_db_init: bool = False):
+        """
+        Args:
+            do_force_new_db_init: useful in tests, when running concurrent tests with
+             in-memory SQLite db. See sqlite-full-text-search in experiments-monorepo.
+        """
+        self.do_force_new_db_init = do_force_new_db_init
+
+    def __enter__(self):
+        db = get_db(do_force_new_db_init=self.do_force_new_db_init)
+        self.was_already_open = False if db.is_closed() else True
+
+        if not self.was_already_open:
+            # db.connect(reuse_if_open=True)  # Opened by `create_all_tables()`.
+            create_all_tables()
+        return self
+
+    def __exit__(self, *exc):
+        # Consider closing the connection only if it wasn't already open, so it was
+        #  this code that actually opened the connection.
+        if not self.was_already_open:
+            db = get_db()
+            # Close the connection to the DB.
+            # Do not close it here in test (check `conftest.py` instead).
+            if not db.is_closed():  # and not "pytest" in sys.modules:
+                logger.info("Closing DB connection")
+                db.close()
+        return False
 
 
 def serialize_to_sqlite(obj: Any) -> Any:
@@ -264,6 +363,20 @@ def serialize_to_sqlite(obj: Any) -> Any:
     elif isinstance(obj, Enum):
         return obj.value
     return obj
+
+
+# To check all compile options (including the enabled extensions) in SQLite:
+#   https://stackoverflow.com/questions/36655777/python-and-sqlite3-check-if-i-can-use-fts5-extension/36663390#36663390
+def print_compile_options():
+    """
+    Debug function to print all compile options (including the enabled stock
+     extensions like FTS5 and the loading extensions status) in SQLite:
+    """
+    db = get_db()
+    sql = "pragma compile_options;"
+    cursor = db.execute_sql(sql)
+    for row in cursor.fetchall():
+        print(row)
 
 
 def register_tables(*models):
