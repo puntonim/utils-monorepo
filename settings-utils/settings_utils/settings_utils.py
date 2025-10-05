@@ -14,6 +14,14 @@ import os
 from pathlib import Path
 from typing import Callable
 
+# Objects exported to the `import *` in `__init__.py`.
+__all__ = [
+    "get_string_from_env",
+    "get_bool_from_env",
+    "get_string_from_env_or_file",
+    "copy_settings",
+]
+
 
 class _DEFAULT:
     pass
@@ -93,3 +101,18 @@ def get_string_from_env_or_file(
 #             raise KeyError
 #         value = default
 #     return value
+
+
+def copy_settings(from_, to_):
+    """
+    Copy all settings from a class to another.
+    Typically used to copy `test_settings` to `settings` in `pytest.py`.
+    """
+    attr_names = [
+        attr
+        for attr in dir(from_)
+        if not callable(getattr(from_, attr)) and not attr.startswith("__")
+    ]
+    for attr_name in attr_names:
+        attr_value = getattr(from_, attr_name)
+        setattr(to_, attr_name, attr_value)
