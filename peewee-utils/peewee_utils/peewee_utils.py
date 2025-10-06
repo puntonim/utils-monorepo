@@ -6,7 +6,7 @@
 I prefer not to use versioning in order to keep things simple.*
 
 Used, among the others, in:
- - sqlite-full-text-search in experiments-monorepo (GREAT EXAMPLE).
+ - (GREAT EXAMPLE) https://github.com/puntonim/experiments-monorepo/tree/main/SQLITE%20FULL-TEXT%20SEARCH/sqlite-full-text-search-cli-exp
 
 Models definition
 -----------------
@@ -70,6 +70,15 @@ peewee_utils.configure(
 
 Functions/methods that require access to DB
 -------------------------------------------
+First you need to create the DB, only once.
+For instance, you can create a CLI admin command (or an admin endpoint) that runs:
+(example: See for example: https://github.com/puntonim/experiments-monorepo/blob/main/SQLITE%20FULL-TEXT%20SEARCH/sqlite-full-text-search-cli-exp/fts_exp/views/admin/admin_db_create_cli_view.py)
+```py
+import peewee
+
+peewee_utils.create_all_tables()
+```
+
 Then use the decorator and ctx manager `peewee_utils.use_db()` with any function/method
  or snippet that requires access to the DB:
 ```py
@@ -88,7 +97,7 @@ def count():
 
 Tests
 -----
-See tests in sqlite-full-text-search in experiments-monorepo.
+See tests in sqlite-full-text-search-cli-exp in experiments-monorepo: https://github.com/puntonim/experiments-monorepo/tree/main/SQLITE%20FULL-TEXT%20SEARCH/sqlite-full-text-search-cli-exp/tests
 
 In `conftest.py`:
 ```py
@@ -107,6 +116,7 @@ def use_db_fixture(test_settings_fixture):
     # `do_force_new_db_init` is required when running concurrent tests with in-memory
     #  SQLite db.
     with peewee_utils.use_db(do_force_new_db_init=True):
+        peewee_utils.create_all_tables()
         yield
 ```
 
@@ -326,26 +336,23 @@ class use_db(ContextDecorator):
              in-memory SQLite db. See sqlite-full-text-search in experiments-monorepo.
         """
         self.do_force_new_db_init = do_force_new_db_init
+        self.db = None
 
     def __enter__(self):
-        db = get_db(do_force_new_db_init=self.do_force_new_db_init)
-        self.was_already_open = False if db.is_closed() else True
-
-        if not self.was_already_open:
-            # db.connect(reuse_if_open=True)  # Opened by `create_all_tables()`.
-            create_all_tables()
+        self.db = get_db(do_force_new_db_init=self.do_force_new_db_init)
+        self.was_already_open = False if self.db.is_closed() else True
+        self.db.connect(reuse_if_open=True)
         return self
 
     def __exit__(self, *exc):
         # Consider closing the connection only if it wasn't already open, so it was
         #  this code that actually opened the connection.
         if not self.was_already_open:
-            db = get_db()
             # Close the connection to the DB.
             # Do not close it here in test (check `conftest.py` instead).
-            if not db.is_closed():  # and not "pytest" in sys.modules:
+            if not self.db.is_closed():
                 logger.info("Closing DB connection")
-                db.close()
+                self.db.close()
         return False
 
 

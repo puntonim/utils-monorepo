@@ -54,7 +54,8 @@ END;
 peewee_utils.configure(get_sqlite_db_path_fn=lambda: ":memory:")
 
 
-def _add_rows():
+def _create_rows():
+    peewee_utils.create_all_tables()
     a0 = MyActivityModel.create(name="one")
     a1 = MyActivityModel.create(name="two")
     return a0, a1
@@ -67,19 +68,19 @@ class Test:
     #   in-memory SQLite db.
     @peewee_utils.use_db(do_force_new_db_init=True)
     def test_happy_flow_decorator(self):
-        _add_rows()
+        _create_rows()
         assert MyActivityModel.select().count() == 2
 
     def test_happy_flow_ctx_manager(self):
         with peewee_utils.use_db(do_force_new_db_init=True):
-            _add_rows()
+            _create_rows()
             assert MyActivityModel.select().count() == 2
 
     # `do_force_new_db_init` is useful in tests, when running concurrent tests with
     #   in-memory SQLite db.
     @peewee_utils.use_db(do_force_new_db_init=True)
     def test_updated_at(self):
-        _add_rows()
+        _create_rows()
         # The goal is to ensure that when updating an MyActivityModel, then its `updated_at`
         #  attribute is automatically updated.
         a = MyActivityModel.get_by_id(1)
