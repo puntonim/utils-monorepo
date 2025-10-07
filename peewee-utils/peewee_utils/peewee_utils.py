@@ -191,16 +191,6 @@ def configure(
     _CONFIG["get_do_log_peewee_queries_fn"] = get_do_log_peewee_queries_fn
     _CONFIG["get_load_extensions_fn"] = get_load_extensions_fn
 
-    if get_do_log_peewee_queries_fn():
-        # Log all queries to stderr.
-        # Doc: https://docs.peewee-orm.com/en/latest/peewee/database.html#logging-queries
-
-        import logging
-
-        peewee_logger = logging.getLogger("peewee")
-        peewee_logger.addHandler(logging.StreamHandler())
-        peewee_logger.setLevel(logging.DEBUG)
-
 
 def get_db(do_force_new_db_init: bool = False) -> PooledSqliteDatabase:
     """
@@ -221,6 +211,18 @@ def _db_init():
     sqlite_db_path = _CONFIG["get_sqlite_db_path_fn"]()
     # Note: sqlite_db_path gets stored in `db.database`.
     logger.info(f"Using DB {sqlite_db_path} ...")
+
+    # Log to stderr if the fn get_do_log_peewee_queries_fn() passed in the config()
+    #  returns true.
+    get_do_log_peewee_queries_fn = _CONFIG["get_do_log_peewee_queries_fn"]
+    if get_do_log_peewee_queries_fn():
+        # Log all queries to stderr.
+        # Doc: https://docs.peewee-orm.com/en/latest/peewee/database.html#logging-queries
+        import logging
+
+        peewee_logger = logging.getLogger("peewee")
+        peewee_logger.addHandler(logging.StreamHandler())
+        peewee_logger.setLevel(logging.DEBUG)
 
     # Use PRAGMA foreign_keys to enforce foreign-key constraints to avoid being able to
     #  insert a row with a foreign key ID that does not exist.
