@@ -27,6 +27,10 @@ dependencies = [
 # This section is required only when there are editable (develop = true) dependencies.
 datetime-utils = {develop = true}
 ```
+or:
+```sh
+$ poetry add ../datetime-utils
+```
 
 Github install
 --------------
@@ -37,6 +41,10 @@ To install this client in a Poetry project, from Github, add this to `pyproject.
 dependencies = [
     "datetime-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=datetime-utils",
 ]
+```
+or:
+```sh
+$ poetry add git+https://github.com/puntonim/utils-monorepo#subdirectory=datetime-utils
 ```
 
 Pip install
