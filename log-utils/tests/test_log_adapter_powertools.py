@@ -1,6 +1,7 @@
-import log_utils as logger
 import pytest
 from _pytest.logging import LogCaptureFixture
+
+import log_utils as logger
 
 
 @pytest.fixture(scope="function")

@@ -40,5 +40,5 @@ class RichAdapter(BaseLogAdapter):
     def _log(self, message: str, extra: dict | None = None):
         args = [x for x in (message, extra) if x]
         # Use _stack_offset=4 to get to the original source line that
-        #  invoked the log statement.
+        #  invoked the log statement, which is 4 frames above in the stack.
         self.stderr_console.log(*args, _stack_offset=4)

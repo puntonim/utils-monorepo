@@ -31,19 +31,23 @@ class PowertoolsLoggerAdapter(BaseLogAdapter):
         )
 
     def debug(self, message: str, extra: dict | None = None):
-        self.logger.debug(message, extra=extra)
+        # Use stacklevel=4 to get to the original source line that
+        #  invoked the log statement, which is 4 frames above in the stack.
+        # It's an arg used in Python std-lib logging:
+        #  https://docs.python.org/3/library/logging.html#logging.Logger.debug
+        self.logger.debug(message, extra=extra, stacklevel=4)
 
     def info(self, message: str, extra: dict | None = None):
-        self.logger.info(message, extra=extra)
+        self.logger.info(message, extra=extra, stacklevel=4)
 
     def warning(self, message: str, extra: dict | None = None):
-        self.logger.warning(message, extra=extra)
+        self.logger.warning(message, extra=extra, stacklevel=4)
 
     def error(self, message: str, extra: dict | None = None):
-        self.logger.error(message, extra=extra)
+        self.logger.error(message, extra=extra, stacklevel=4)
 
     def critical(self, message: str, extra: dict | None = None):
-        self.logger.critical(message, extra=extra)
+        self.logger.critical(message, extra=extra, stacklevel=4)
 
     def exception(self, message: str | None = None, extra: dict | None = None):
         if extra:
@@ -53,4 +57,6 @@ class PowertoolsLoggerAdapter(BaseLogAdapter):
                 if message:
                     message += "\n"
                 message += f"{key}={serialized_value}"
-        self.logger.exception(message, exc_info=sys.exc_info(), stack_info=True)
+        self.logger.exception(
+            message, exc_info=sys.exc_info(), stack_info=True, stacklevel=4
+        )
