@@ -41,7 +41,7 @@ Actual examples:
  - event-publisher, Docker CLI with Loguru:
      hdmap-web/projects/event-publisher/event_publisher/cli.py
 
-My new project "space" pip-installs the lib `peewee-utils` (or any other lib in
+Suppose my new project "space" pip-installs the lib `peewee-utils` (or any other lib in
  utils-monorepo) that requires `log-utils`.
 The project "space" invokes `set_adapter(...)` with a `LoguruAdapter` so that
  `peewee-utils` logs entries using Loguru (instead of the default std libs's logging
@@ -77,33 +77,46 @@ logger.debug("Hello", extra={"color": "red"})
 Example: AWS Lambda project
 ---------------------------
 Actual examples:
+ - botte-be, AWS Lambda with Powertools:
+    https://github.com/puntonim/botte-monorepo/tree/main/projects/botte-be
  - odd-manager, AWS Lambda REST API with Powertools:
-     hdmap-web/projects/odd-manager/odd_manager/views/endpoints/odd_definition_view/read_all_view.py
+    hdmap-web/projects/odd-manager/odd_manager/views/endpoints/odd_definition_view/read_all_view.py
 
-My new project "space" pip-installs the lib `peewee-utils` (or any other lib in
+Suppose my new project "space" pip-installs the lib `peewee-utils` (or any other lib in
  utils-monorepo) that requires `log-utils`.
 The project "space" invokes `set_adapter(...)` with a `PowertoolsLoggerAdapter` so
  that `peewee-utils` logs entries using Powertools (instead of the default std libs's
  logging module).
 
-So, in project "space", in every lambda handler (view):
+So, in project "space", in *every* lambda handler (view):
 ```py
 import log_utils as logger
+
+# Note: I can also move this block to a `lambda_static_init()` fn shared across all
+#  Lambdas in the project, see `botte-be`.
 powertools_logger = logger.PowertoolsLoggerAdapter()
 # Now we can either invoke `configure_default()` or configure directly Powertools
 #  in the project.
-# powertools_logger.configure_default(
-#     service_name=f"ODD Manager BE",
-#     service_version=__version__,
-#     is_verbose=False,
-# )
+powertools_logger.configure_default(
+    service_name=settings.APP_NAME,
+    service_version=__version__,
+    is_verbose=False,
+)
 logger.set_adapter(powertools_logger)
+
+logger.info("ENDPOINT INTROSPECTION: LOADING")
+
+@logger.get_adapter().inject_lambda_context(log_event=True)
+def lambda_handler(event: dict[str, Any], context: LambdaContext) -> dict:
+    logger.info("ENDPOINT INTROSPECTION: START")
+    ...
 ```
-and now anywhere in the project we can:
+
+And in any other file in the project, I can just:
 ```py
-# Now we can log either using logger from log-utils or powertools:
-import log_utils as logger  # Or: from aws_lambda_powertools import Logger; logger = Logger(...).
-logger.debug("START")
+# I can log either using logger from log-utils or powertools:
+import log_utils as logger
+logger.debug("Hello", extra={"color": "red"})
 ```
 
 Note: the `peewee-utils` lib contains log entries that are agnostic of the actual

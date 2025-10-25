@@ -60,3 +60,6 @@ class PowertoolsLoggerAdapter(BaseLogAdapter):
         self.logger.exception(
             message, exc_info=sys.exc_info(), stack_info=True, stacklevel=4
         )
+
+    def inject_lambda_context(self, *args, **kwargs):
+        return self.logger.inject_lambda_context(*args, **kwargs)
