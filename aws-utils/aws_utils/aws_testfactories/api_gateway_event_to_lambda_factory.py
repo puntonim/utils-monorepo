@@ -92,6 +92,7 @@ class ApiGatewayV2EventToLambdaFactory:
         body_dict: dict | None = None,
         body_json: str | None = None,
         path_parameters_dict: dict | None = None,
+        headers: dict | None = None,
     ):
         data = {
             "version": "2.0",
@@ -140,6 +141,8 @@ class ApiGatewayV2EventToLambdaFactory:
                 "proxy": "/path/to/resource",
                 **path_parameters_dict,
             }
+        if headers:
+            data["headers"].update(headers)
         return data
 
     @staticmethod

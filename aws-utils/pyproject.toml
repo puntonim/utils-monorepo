@@ -6,7 +6,7 @@ authors = [
     {name = "puntonim",email = "puntonim@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<4"  # <4 required only by the extra aws-lambda-powertools.
 dependencies = [
     "json-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=json-utils",
     "log-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=log-utils"
@@ -15,6 +15,13 @@ dependencies = [
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[project.optional-dependencies]
+# Extra (optional) dependencies that users of this project might choose to install or not.
+#
+# In order to use @redact_http_headers() to decorate a lambda_handler(), AWS Lambda
+#  Powertools for Pyton is required.
+lambda-redact-http-headers = ["aws-lambda-powertools[aws-sdk] (>=3.22.0,<4.0.0)"]
 
 [tool.poetry.group.dev.dependencies]
 black = "24.10.0"
