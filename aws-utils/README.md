@@ -3,6 +3,9 @@
 
 Just some Python AWS utils.
 
+*Note: there are AWS clients in [clients-monorepo](https://github.com/puntonim/clients-monorepo) 
+ like [aws-parameter-store-client](https://github.com/puntonim/clients-monorepo/tree/main/aws-parameter-store-client),
+ however this code is here in `utils-monorepo` as it is just a set of minor utils.*
 
 Usage
 =====
@@ -12,6 +15,15 @@ Usage
 See top docstrings in [aws_lambda_utils.py](aws_utils/aws_lambda_utils.py),
  [api_gateway_event_factory](aws_utils/aws_testfactories/api_gateway_event_factory.py)
  and all the other files.
+
+
+TODO
+mention the extra aws-utils[lambda-redact-http-headers]
+for redact_http_headers()
+
+
+
+
 
 Local dir install
 -----------------

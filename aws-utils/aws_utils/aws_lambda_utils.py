@@ -107,22 +107,37 @@ class Created201Response(BaseJsonResponse):
     STATUS_CODE = 201
 
 
-def __raise_fn(msg):
-    raise Exception(msg)
+def redact_http_headers(headers_names: Sequence[str]):
+    """
+    This fn is available only if pip-installed with the extra:
+     pip install aws-utils[lambda-redact-http-headers]
 
+    Redact HTTP headers before they end up in CloudWatch logs.
+    Typical usage: authorization header.
 
-redact_http_headers = lambda *args, **kwargs: __raise_fn(
-    "The extra lib `aws_lambda_powertools` is required in order to use"
-    " `redact_http_headers()`; you should:"
-    " pip install aws-utils[lambda-redact-http-headers]"
-)
-_is_powertools_req_installed = False
-try:
-    _is_powertools_req_installed = importlib.import_module("aws_lambda_powertools")
-except ImportError as exc:
-    pass
+    Example:
+        from aws_utils import aws_lambda_utils
 
-if _is_powertools_req_installed:
+        @aws_lambda_utils.redact_http_headers(headers_names=("authorization",))
+        @logger.get_adapter().inject_lambda_context(log_event=True)
+        def lambda_handler(event: dict[str, Any], context: LambdaContext) -> dict:
+            ...
+    """
+    # Note: this code is a bit more complex than what it could be (see example in:
+    #  https://github.com/puntonim/utils-monorepo/blob/e2f8f756153e21ee459424a520af09d7a9fabcd8/settings-utils/settings_utils/settings_utils.py#L95)
+    #  because the actual `_redact_http_headers()` is decorated with
+    #  `@lambda_handler_decorator`, which needs to be dynamically imported.
+
+    try:
+        _is_powertools_req_installed = importlib.import_module("aws_lambda_powertools")
+    except ImportError as exc:
+        msg = (
+            "The extra lib `aws_lambda_powertools` is required in order to use"
+            " `redact_http_headers()`; you should:"
+            " pip install aws-utils[lambda-redact-http-headers]"
+        )
+        raise Exception(msg) from exc
+
     # Dynamically import requirements.
     lambda_handler_decorator = importlib.import_module(
         "aws_lambda_powertools.middleware_factory"
@@ -138,18 +153,6 @@ if _is_powertools_req_installed:
         context: LambdaContext,
         headers_names: Sequence[str],
     ) -> dict:
-        """
-        Redact HTTP headers before they end up in CloudWatch logs.
-        Typical usage: authorization header.
-
-        Example:
-            from aws_utils import aws_lambda_utils
-
-            @aws_lambda_utils.redact_http_headers(headers_names=("authorization",))
-            @logger.get_adapter().inject_lambda_context(log_event=True)
-            def lambda_handler(event: dict[str, Any], context: LambdaContext) -> dict:
-                ...
-        """
         # Implemented with the Middleware Factory of AWS Lambda Powertools for Python:
         #  https://docs.aws.amazon.com/powertools/python/latest/utilities/middleware_factory
 
@@ -177,4 +180,4 @@ if _is_powertools_req_installed:
 
         return response
 
-    redact_http_headers = _redact_http_headers
+    return _redact_http_headers(headers_names=headers_names)
