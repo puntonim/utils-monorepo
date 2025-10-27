@@ -9,6 +9,7 @@ settings_utils.get_string_from_env("DB_USER", "XXX")
 ```
 """
 
+import importlib
 import json
 import os
 from pathlib import Path
@@ -20,6 +21,7 @@ __all__ = [
     "get_bool_from_env",
     "get_string_from_env_or_file",
     "copy_settings",
+    "get_string_from_env_or_aws_parameter_store",
 ]
 
 
@@ -75,34 +77,6 @@ def get_string_from_env_or_file(
     return value
 
 
-## Not implemented yet: see project Reborn Automator.
-# def get_string_from_env_or_aws_parameter_store(
-#     env_key: str,
-#     parameter_store_key_path: str | Path,
-#     default: str | None = _DEFAULT,
-#     is_value_json=False,
-# ):
-#     try:
-#         value = get_string_from_env(env_key)
-#     except KeyError:
-#         value = None
-#
-#     if value is None:
-#         value = ParameterStoreClient().get_secret(parameter_store_key_path)
-#
-#     if value and is_value_json:
-#         # Hack: store JSON strings as env vars (or in Parameter store) with
-#         #  a starting and ending single quote, like '{"foo": "bar"}'.
-#         value = value.replace("'", "")
-#         value = json.loads(value)
-#
-#     if value is None:
-#         if default == _DEFAULT:
-#             raise KeyError
-#         value = default
-#     return value
-
-
 def copy_settings(from_, to_):
     """
     Copy all settings from a class to another.
@@ -116,3 +90,47 @@ def copy_settings(from_, to_):
     for attr_name in attr_names:
         attr_value = getattr(from_, attr_name)
         setattr(to_, attr_name, attr_value)
+
+
+def get_string_from_env_or_aws_parameter_store(
+    env_key: str,
+    parameter_store_key_path: str | Path,
+    default: str | None = _DEFAULT,
+    is_value_json=False,
+):
+    """
+    This fn is available only if pip-installed with the extra:
+     pip install settings-utils[get-from-aws-param-store]
+    """
+    try:
+        # Since this requires an extra req, dynamically import requirements.
+        AwsParameterStoreClient = importlib.import_module(
+            "aws_parameter_store_client"
+        ).AwsParameterStoreClient
+    except ImportError as exc:
+        msg = (
+            "The extra lib `aws-parameter-store-client` is required in order to use"
+            " `get_string_from_env_or_aws_parameter_store()`; you should:"
+            " pip install settings-utils[get-from-aws-param-store]"
+        )
+        raise Exception(msg) from exc
+
+    try:
+        value = get_string_from_env(env_key)
+    except KeyError:
+        value = None
+
+    if value is None:
+        value = AwsParameterStoreClient().get_secret(parameter_store_key_path)
+
+    if value and is_value_json:
+        # Hack: store JSON strings as env vars (or in Parameter store) with
+        #  a starting and ending single quote, like '{"foo": "bar"}'.
+        value = value.replace("'", "")
+        value = json.loads(value)
+
+    if value is None:
+        if default == _DEFAULT:
+            raise KeyError
+        value = default
+    return value

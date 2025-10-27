@@ -12,6 +12,10 @@ Usage
 See top docstrings in [settings_utils.py](settings_utils/settings_utils.py)
  and [settings_testutils.py](settings_utils/settings_testutils.py).
 
+
+TODO mention the extra `et-from-aws-param-store` for `get_string_from_env_or_aws_parameter_store()`
+
+
 Local dir install
 -----------------
 To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:
