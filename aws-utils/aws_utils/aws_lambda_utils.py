@@ -2,7 +2,7 @@
 ** AWS UTILS: AWS LAMBDA UTILS **
 =================================
 
-Response util for AWS Lambda.
+Utils for AWS Lambda.
 
 Note: there are more utils to copy from patatrack_utils in patatrack-monorepo.
 

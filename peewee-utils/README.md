@@ -1,61 +1,55 @@
-**Utils monorepo: Peewee Utils**
-==================================
+**🐁 Utils monorepo: Peewee Utils**
+===================================
 
 Just some Python [Peewee ORM](https://github.com/coleifer/peewee) utils.
 
 
-Usage
-=====
+⚡ Usage
+=======
 
 ---
 
 See top docstring in [peewee_utils.py](peewee_utils/peewee_utils.py).
 
-Local dir install
------------------
-To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:
-```sh
-$ poetry add ../peewee-utils
-```
-or:
-```toml
-[project]
-...
-dependencies = [
-    "peewee-utils @ ../peewee-utils"
-    # "peewee-utils @ file:///Users/myuser/workspace/utils-monorepo/peewee-utils"
-]
-
-[tool.poetry.dependencies]
-# This section is required only when there are editable (develop = true) dependencies.
-peewee-utils = {develop = true}
-```
-
-Github install
+Poetry install
 --------------
-To install this client in a Poetry project, from Github, add this to `pyproject.toml`:
+From Github:
 ```sh
 $ poetry add git+https://github.com/puntonim/utils-monorepo#subdirectory=peewee-utils
+# at a specific version:
+$ poetry add git+https://github.com/puntonim/utils-monorepo@3da9603977a5e2948429627ac83309353cca693d#subdirectory=peewee-utils
 ```
-or:
-```toml
-[project]
-...
-dependencies = [
-    "peewee-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=peewee-utils",
-]
+
+From a local dir:
+```sh
+$ poetry add ../utils-monorepo/peewee-utils/
+$ poetry add "peewee-utils @ file:///Users/myuser/workspace/utils-monorepo/peewee-utils/"
 ```
 
 Pip install
 -----------
-```sh
-$ pip install "peewee-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=peewee-utils"
-```
+Same syntax as Poetry, but change `poetry add` with `pip install`.
 
 
-Development setup
-=================
+🛠️ Development setup
+====================
 
 ---
 
 See [README.md](../README.md) in the root dir.
+
+
+🚀 Deployment
+=============
+
+---
+
+These utils are not deployed to PyPI.
+
+
+©️ Copyright
+============
+
+---
+
+Copyright puntonim (https://github.com/puntonim). No License.

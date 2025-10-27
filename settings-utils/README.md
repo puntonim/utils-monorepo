@@ -1,58 +1,64 @@
-**Utils monorepo: Settings Utils**
-==================================
+**⚙️ Utils monorepo: Settings Utils**
+=====================================
 
 Just some Python settings utils.
 
 
-Usage
-=====
+⚡ Usage
+=======
 
 ---
 
 See top docstrings in [settings_utils.py](settings_utils/settings_utils.py)
  and [settings_testutils.py](settings_utils/settings_testutils.py).
 
+Note: in order to use the util `settings_utils.get_string_from_env_or_aws_parameter_store(...)` you 
+ need to install the extra `get-from-aws-param-store`.
 
-TODO mention the extra `et-from-aws-param-store` for `get_string_from_env_or_aws_parameter_store()`
 
-
-Local dir install
------------------
-To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:
-```toml
-[project]
-...
-dependencies = [
-    "settings-utils @ ../settings-utils"
-    # "settings-utils @ file:///Users/myuser/workspace/utils-monorepo/settings-utils"
-]
-
-[tool.poetry.dependencies]
-# This section is required only when there are editable (develop = true) dependencies.
-settings-utils = {develop = true}
+Poetry install
+--------------
+From Github:
+```sh
+$ poetry add git+https://github.com/puntonim/utils-monorepo#subdirectory=settings-utils
+# at a specific version:
+$ poetry add git+https://github.com/puntonim/utils-monorepo@3da9603977a5e2948429627ac83309353cca693d#subdirectory=settings-utils
+# with the extra `get-from-aws-param-store`:
+$ poetry add "git+https://github.com/puntonim/utils-monorepo#subdirectory=settings-utils[get-from-aws-param-store]"
 ```
 
-Github install
---------------
-To install this client in a Poetry project, from Github, add this to `pyproject.toml`:
-```toml
-[project]
-...
-dependencies = [
-    "settings-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=settings-utils",
-]
+From a local dir:
+```sh
+$ poetry add ../utils-monorepo/settings-utils/
+$ poetry add "settings-utils @ file:///Users/myuser/workspace/utils-monorepo/settings-utils/"
+# with the extra `get-from-aws-param-store`:
+$ poetry add "../utils-monorepo/settings-utils/[get-from-aws-param-store]"
 ```
 
 Pip install
 -----------
-```sh
-$ pip install "settings-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=settings-utils"
-```
+Same syntax as Poetry, but change `poetry add` with `pip install`.
 
 
-Development setup
-=================
+🛠️ Development setup
+====================
 
 ---
 
 See [README.md](../README.md) in the root dir.
+
+
+🚀 Deployment
+=============
+
+---
+
+These utils are not deployed to PyPI.
+
+
+©️ Copyright
+============
+
+---
+
+Copyright puntonim (https://github.com/puntonim). No License.

@@ -1,53 +1,56 @@
-**Utils monorepo: JSON Utils**
+**🐍 Utils monorepo: JSON Utils**
 ==================================
 
 Just some Python JSON utils.
 
 
-Usage
-=====
+⚡ Usage
+=======
 
 ---
 
 See top docstrings in [json_utils.py](json_utils/json_utils.py).
 
-Local dir install
------------------
-To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:
-```toml
-[project]
-...
-dependencies = [
-    "json-utils @ ../json-utils"
-    # "json-utils @ file:///Users/myuser/workspace/utils-monorepo/json-utils"
-]
-
-[tool.poetry.dependencies]
-# This section is required only when there are editable (develop = true) dependencies.
-json-utils = {develop = true}
+Poetry install
+--------------
+From Github:
+```sh
+$ poetry add git+https://github.com/puntonim/utils-monorepo#subdirectory=json-utils
+# at a specific version:
+$ poetry add git+https://github.com/puntonim/utils-monorepo@3da9603977a5e2948429627ac83309353cca693d#subdirectory=json-utils
 ```
 
-Github install
---------------
-To install this client in a Poetry project, from Github, add this to `pyproject.toml`:
-```toml
-[project]
-...
-dependencies = [
-    "json-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=json-utils",
-]
+From a local dir:
+```sh
+$ poetry add ../utils-monorepo/json-utils/
+$ poetry add "json-utils @ file:///Users/myuser/workspace/utils-monorepo/json-utils/"
 ```
 
 Pip install
 -----------
-```sh
-$ pip install "json-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=json-utils"
-```
+Same syntax as Poetry, but change `poetry add` with `pip install`.
 
 
-Development setup
-=================
+🛠️ Development setup
+====================
 
 ---
 
 See [README.md](../README.md) in the root dir.
+
+
+🚀 Deployment
+=============
+
+---
+
+These utils are not deployed to PyPI.
+
+
+©️ Copyright
+============
+
+---
+
+Copyright puntonim (https://github.com/puntonim). No License.
+

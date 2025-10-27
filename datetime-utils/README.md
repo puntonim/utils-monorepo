@@ -1,62 +1,56 @@
-**Utils monorepo: Datetime Utils**
-==================================
+**📅 Utils monorepo: Datetime Utils**
+=====================================
 
 Just some Python date and time utils.
 
 
-Usage
-=====
+⚡ Usage
+=======
 
 ---
 
 See top docstrings in [datetime_utils.py](datetime_utils/datetime_utils.py)
  and [datetime_testutils.py](datetime_utils/datetime_testutils.py).
 
-Local dir install
------------------
-To install this client in a Poetry project, from a local dir, add this to `pyproject.toml`:
-```toml
-[project]
-...
-dependencies = [
-    "datetime-utils @ ../datetime-utils"
-    # "datetime-utils @ file:///Users/myuser/workspace/utils-monorepo/datetime-utils"
-]
-
-[tool.poetry.dependencies]
-# This section is required only when there are editable (develop = true) dependencies.
-datetime-utils = {develop = true}
-```
-or:
-```sh
-$ poetry add ../datetime-utils
-```
-
-Github install
+Poetry install
 --------------
-To install this client in a Poetry project, from Github, add this to `pyproject.toml`:
-```toml
-[project]
-...
-dependencies = [
-    "datetime-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=datetime-utils",
-]
-```
-or:
+From Github:
 ```sh
 $ poetry add git+https://github.com/puntonim/utils-monorepo#subdirectory=datetime-utils
+# at a specific version:
+$ poetry add git+https://github.com/puntonim/utils-monorepo@3da9603977a5e2948429627ac83309353cca693d#subdirectory=datetime-utils
+```
+
+From a local dir:
+```sh
+$ poetry add ../utils-monorepo/datetime-utils/
+$ poetry add "datetime-utils @ file:///Users/myuser/workspace/utils-monorepo/datetime-utils/"
 ```
 
 Pip install
 -----------
-```sh
-$ pip install "datetime-utils @ git+https://github.com/puntonim/utils-monorepo#subdirectory=datetime-utils"
-```
+Same syntax as Poetry, but change `poetry add` with `pip install`.
 
 
-Development setup
-=================
+🛠️ Development setup
+====================
 
 ---
 
 See [README.md](../README.md) in the root dir.
+
+
+🚀 Deployment
+=============
+
+---
+
+These utils are not deployed to PyPI.
+
+
+©️ Copyright
+============
+
+---
+
+Copyright puntonim (https://github.com/puntonim). No License.

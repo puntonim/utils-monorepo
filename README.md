@@ -1,24 +1,26 @@
-**Utils monorepo**
-==================
+**🛠️ Utils monorepo**
+=====================
 
-Just a collection of Python utils.\
+Just a collection of Python utils.
+
 Each util is a standalone Python project that can be installed individually 
  from the subdir.
 
 
-Target Python version
-=====================
+🎯 Target Python version
+========================
 
 ---
 
 The target is a Python version that is recent enough, but not too recent for a wide
  compatibility.\
 Python 3.10 seems a good compromise.\
-Note: Python 3.10 introduced the annotation `| None` for optional types, among other things.
+
+*Note: Python 3.10 introduced the annotation `| None` for optional types, among other things.*
 
 
-Development setup
-=================
+🛠️ Development setup
+====================
 
 ---
 
@@ -77,13 +79,37 @@ $ poetry install
 $ deactivate
 ```
 
-To add a new requirement:
+To add new requirements:
 ```sh
 $ poetry add requests
-$ poetry add pytest --dev  # Dev only.
-$ poetry add requests[security,socks]  # With extras.
-$ poetry add git+https://github.com/puntonim/strava-monorepo#subdirectory=libs/strava-client  # From git.
-$ poetry add "git+https://github.com/puntonim/strava-monorepo#subdirectory=libs/strava-client[aws-parameter-store]"  # From git with extras.
+
+# Dev or test only.
+$ poetry add -G test pytest
+$ poetry add -G dev ipdb
+
+# With extra reqs:
+$ poetry add -G dev "aws-lambda-powertools[aws-sdk]"
+$ poetry add "requests[security,socks]"
+
+# From Git:
+$ poetry add git+https://github.com/aladagemre/django-notification
+
+# From a Git subdir:
+$ poetry add git+https://github.com/puntonim/utils-monorepo#subdirectory=log-utils
+# and with extra reqs:
+$ poetry add "git+https://github.com/puntonim/utils-monorepo#subdirectory=log-utils[rich-adapter,loguru-adapter]"
+# and at a specific version:
+$ poetry add git+https://github.com/puntonim/utils-monorepo@00a49cb64524df19bf55ab5c7c1aaf4c09e92360#subdirectory=log-utils
+# and at a specific version, with extra reqs:
+$ poetry add "git+https://github.com/puntonim/utils-monorepo@00a49cb64524df19bf55ab5c7c1aaf4c09e92360#subdirectory=log-utils[rich-adapter,loguru-adapter]"
+
+# From a local dir:
+$ poetry add ../utils-monorepo/log-utils/
+$ poetry add "log-utils @ file:///Users/myuser/workspace/utils-monorepo/log-utils/"
+# and with extra reqs:
+$ poetry add "../utils-monorepo/log-utils/[rich-adapter,loguru-adapter]"
+# and I was able to choose a Git version only with pip (not poetry):
+$ pip install "git+file:///Users/myuser/workspace/utils-monorepo@00a49cb64524df19bf55ab5c7c1aaf4c09e92360#subdirectory=log-utils" 
 ```
 
 3 - Pre-commit
@@ -94,8 +120,8 @@ $ pre-commit install
 ```
 
 
-Deployment
-==========
+🚀 Deployment
+=============
 
 ---
 
@@ -104,8 +130,8 @@ See the individual `README.md` file in each util subdir to know how to install a
  each util.
 
 
-Copyright
-=========
+©️ Copyright
+============
 
 ---
 
