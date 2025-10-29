@@ -56,7 +56,9 @@ deploy:
 
 .PHONY : test
 test:
-	poetry run pytest -s tests/ -v -n auto --durations=3
+	# poetry run pytest -s tests/ -v -n auto --durations=3
+	# Without poetry, the startup time is less, but you need to activate the env first.
+	pytest -s tests/ -v -n auto --durations=3
 
 
 .PHONY : format
