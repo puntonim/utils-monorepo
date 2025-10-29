@@ -94,13 +94,23 @@ def copy_settings(from_, to_):
 
 def get_string_from_env_or_aws_parameter_store(
     env_key: str,
-    parameter_store_key_path: str | Path,
+    param_store_key_path: str | Path,
     default: str | None = _DEFAULT,
     is_value_json=False,
+    param_store_cache_ttl: int | None = None,
+    do_skip_param_store_cache=False,
 ):
     """
-    This fn is available only if pip-installed with the extra:
+     Note: this fn is available only if pip-installed with the extra:
      pip install settings-utils[get-from-aws-param-store]
+
+    Args:
+        env_key: name of the env var.
+        parameter_store_key_path: path in AWS Param Store.
+        default: default value, if the string is not found in the env var nor in Param Store.
+        is_value_json: True for JSON value.
+        param_store_cache_ttl: time-to-live for the Python in-memory cached params from AWS Param Store, seconds.
+        do_skip_param_store_cache: skip the Python in-memory cache for AWS Param Store.
     """
     try:
         # Since this requires an extra req, dynamically import requirements.
@@ -121,7 +131,13 @@ def get_string_from_env_or_aws_parameter_store(
         value = None
 
     if value is None:
-        value = AwsParameterStoreClient().get_secret(parameter_store_key_path)
+        kwargs = dict(
+            path=param_store_key_path,
+            do_skip_cache=do_skip_param_store_cache,
+        )
+        if param_store_cache_ttl is not None:
+            kwargs["cache_ttl"] = param_store_cache_ttl
+        value = AwsParameterStoreClient().get_secret(**kwargs)
 
     if value and is_value_json:
         # Hack: store JSON strings as env vars (or in Parameter store) with
