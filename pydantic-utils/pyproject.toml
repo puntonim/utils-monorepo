@@ -1,6 +1,6 @@
 [project]
 name = "pydantic-utils"
-description = "Pydantic Utils"
+description = "Utils Monorepo: Pydantic Utils"
 version = "1.0.0"
 authors = [
     {name = "puntonim",email = "puntonim@gmail.com"}

@@ -1,6 +1,6 @@
 [project]
 name = "datetime-utils"
-description = "Datetime Utils"
+description = "Utils Monorepo: Datetime Utils"
 version = "1.0.0"
 authors = [
     {name = "puntonim",email = "puntonim@gmail.com"}

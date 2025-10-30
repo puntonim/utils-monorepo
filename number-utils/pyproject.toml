@@ -1,6 +1,6 @@
 [project]
 name = "number-utils"
-description = "Number Utils"
+description = "Utils Monorepo: Number Utils"
 version = "1.0.0"
 authors = [
     {name = "puntonim",email = "puntonim@gmail.com"}

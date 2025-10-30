@@ -1,6 +1,6 @@
 [project]
 name = "text-utils"
-description = "Text Utils"
+description = "Utils Monorepo: Text Utils"
 version = "1.0.0"
 authors = [
     {name = "puntonim",email = "puntonim@gmail.com"}

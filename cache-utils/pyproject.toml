@@ -1,6 +1,6 @@
 [project]
 name = "cache-utils"
-description = "Cache Utils"
+description = "Utils Monorepo: Cache Utils"
 version = "1.0.0"
 authors = [
     {name = "puntonim",email = "puntonim@gmail.com"}

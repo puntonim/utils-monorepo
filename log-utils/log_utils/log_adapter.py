@@ -25,7 +25,7 @@ How it works
 ------------
 The idea is:
  - Libs in this utils-monorepo import log-utils (`import log_utils as logger`) and
-    have generic log statements like `logger.info("Done")`.
+    have generic log statements like `logger.info("Done")`; example: peewee-utils.
  - Projects that requires libs in this utils-monorepo that use log-utils must import
     log-utils (`import log_utils as logger`), then set the right adapter (loguru,
     AWS Powertools, rich or std lib's logging module) with

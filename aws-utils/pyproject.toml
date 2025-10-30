@@ -1,6 +1,6 @@
 [project]
 name = "aws-utils"
-description = "AWS Utils"
+description = "Utils Monorepo: AWS Utils"
 version = "1.0.0"
 authors = [
     {name = "puntonim",email = "puntonim@gmail.com"}
