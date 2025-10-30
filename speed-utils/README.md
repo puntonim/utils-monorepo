@@ -44,7 +44,10 @@ See [README.md](../README.md) in the root dir.
 
 ---
 
-These utils are not deployed to PyPI.
+*Not deployed* as it can be (pip-)installed directly from Github o local dir 
+ (see Usage section).\
+And *not versioned* as when (pip-)installing from Github, it is possible to choose
+ any version with a hash commit (see Usage section).
 
 
 ©️ Copyright

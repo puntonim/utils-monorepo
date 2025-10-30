@@ -125,9 +125,10 @@ $ pre-commit install
 
 ---
 
-These utils are not deployed to PyPI.\
-See the individual `README.md` file in each util subdir to know how to install and use
- each util.
+Libs are *not deployed* as they can be (pip-)installed directly from Github o local dir 
+ (see Usage section in each lib's main README.md).\
+And *not versioned* as when (pip-)installing from Github, it is possible to choose
+ any version with a hash commit (see Usage section in each lib's main README.md).
 
 
 ©️ Copyright
