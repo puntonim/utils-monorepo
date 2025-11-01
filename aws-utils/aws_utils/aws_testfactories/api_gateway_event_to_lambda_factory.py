@@ -32,6 +32,8 @@ class TestEndpointListActivitiesView:
 
 import json_utils
 
+__all__ = ["ApiGatewayV2EventToLambdaFactory"]
+
 
 class ApiGatewayV2EventToLambdaFactory:
     @staticmethod
