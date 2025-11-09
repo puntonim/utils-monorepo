@@ -91,20 +91,28 @@ def get_string_from_env_or_aws_parameter_store(
     do_skip_param_store_cache=False,
 ):
     """
-    Read a string from env vars (eg. when running in AWS Lambda) or from
-     AWS Param Store (eg. in dev or when recording tests, which is better than using
-     a local file with the secret in plain-text).
+    Read a string from env vars (eg. in PROD for AWS Lambda projects) or from
+     AWS Param Store (eg. in TEST for AWS Lambda projects, when running tests or
+     recording test cassettes).
+    This is way better than using a local file with the secret in plain-text.
+
+    The typical usage, for a **Lambda**, is:
+     - PROD settings: use Serverless to write env vars read from Param Store, then
+        use `get_string_from_env()` in the class `_Settings`.
+     - TEST settings: use `get_string_from_env_or_aws_parameter_store()` in the class
+        `_TestSettings`, and make it a @property (see example down here)
 
     Mind that the actual settings' attribute needs to be a @property for lazily
      evaluation, so vcr.py can catch it on time.
-    And that in order to use @property you have to make `settings` an instance,
-     unlike other projects where `settings` is a class.
-    And also, mind that in conftest.py you have to use the fixture clear_cache_for_aws_param_store_client()
-     to clear AWS Param Store client cache, to make its HTTP interactions
-     deterministic (otherwise vcr.py fails).
+    And also, mind that in conftest.py you have to use the fixture
+     `clear_cache_for_aws_param_store_client()` to clear AWS Param Store client cache,
+     to make its HTTP interactions deterministic (otherwise vcr.py fails).
 
-    Note: this fn is available only if pip-installed with the extra:
-     pip install settings-utils[get-from-aws-param-store]
+    Note: this fn is available only if (pip-)installed with the extra `get-from-aws-param-store`.
+     So, if you follow the pattern shown down here, then:
+     $ poetry add git+https://github.com/puntonim/utils-monorepo#subdirectory=settings-utils
+     $ poetry add -G test "git+https://github.com/puntonim/utils-monorepo#subdirectory=settings-utils[get-from-aws-param-store]"
+     This will install the AWS Param Store Client only as test req.
 
     Args:
         env_key: name of the env var.
@@ -114,19 +122,36 @@ def get_string_from_env_or_aws_parameter_store(
         param_store_cache_ttl: time-to-live for the Python in-memory cached params from AWS Param Store, seconds.
         do_skip_param_store_cache: skip the Python in-memory cache for AWS Param Store.
 
-    Example, from https://github.com/puntonim/botte-monorepo/tree/main/projects/botte-be:
-        File: conf/settings.py
+    Example, from:
+     https://github.com/puntonim/botte-monorepo/tree/main/projects/botte-be:
+     Copy the code from botte-be itself, as it includes useful comments.
+
+        File: conf/settings_module.py
         ```py
+        from abc import ABC
         import settings_utils
 
-        class _Settings:
+        IS_TEST = False
+
+        class _BaseSettings(ABC):
+            def __getattribute__(self, name):
+                if name == "IS_TEST":
+                    return IS_TEST
+                if IS_TEST and hasattr(test_settings, name):
+                    return getattr(test_settings, name)
+                return super().__getattribute__(name)
+
+        class _Settings(_BaseSettings):
             APP_NAME = "Botte BE"
-            IS_TEST = False
             DO_ENABLE_API_AUTHORIZER = True
             API_AUTHORIZER_TOKEN = settings_utils.get_string_from_env(
                 "API_AUTHORIZER_TOKEN", "XXX"
             )
+            TELEGRAM_TOKEN = settings_utils.get_string_from_env(
+                "TELEGRAM_TOKEN", "XXX"
+            )
 
+        class _TestSettings:
             @property
             def TELEGRAM_TOKEN(self):
                 return settings_utils.get_string_from_env_or_aws_parameter_store(
@@ -136,14 +161,17 @@ def get_string_from_env_or_aws_parameter_store(
                     param_store_cache_ttl=60,
                 )
 
-        class _TestSettings:
-            IS_TEST = True
-
         settings = _Settings()
+        test_settings = _TestSettings()
         ```
 
         File: tests/conftest.py
         ```py
+        from botte_be.conf import settings_module
+
+        @pytest.fixture(autouse=True, scope="session")
+        def test_settings_fixture():
+            settings_module.IS_TEST = True
         ...
         @pytest.fixture(autouse=True, scope="function")
         def clear_cache_for_aws_param_store_client():
