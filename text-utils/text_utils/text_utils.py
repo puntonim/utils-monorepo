@@ -17,6 +17,7 @@ __all__ = [
     "camel_to_snake",
     "truncate_text",
     "title_to_snake",
+    "Emoji",
 ]
 
 
@@ -56,3 +57,25 @@ def truncate_text(text: str, max_length: int, symbol="…"):
     if len(text) <= max_length:
         return text
     return text[:max_length] + symbol
+
+
+class Emoji:
+    # Choose an emoji at https://emojipedia.org/
+    #  and see the technical info.
+
+    GREEN_CIRCLE = "\U0001F7E2"
+    ORANGE_CIRCLE = "\U0001F7E0"
+    RED_CIRCLE = "\U0001F534"
+
+    CHECK_MARK1 = "\U0000FE0F"
+    CHECK_MARK2 = "\U00002714"
+    CROSS_MARK = "\U0000274C"
+    POLICE_CAR_LIGHT = "\U0001F6A8"
+
+    THREE_O_CLOCK = "\U0001F552"
+    RED_QUESTION_MARK = "\U00002753"
+    HOURGLASS_NOT_DONE = "\U000023F3"
+    ENVELOPE = "\U00002709"
+    RIGHT_ARROW = "\U000027A1"
+    STAR = "\U00002B50"
+    MUSCLE = "\U0001F4AA"
