@@ -12,6 +12,8 @@ json.dumps(data, cls=json_utils.CustomJsonEncoder)
 ```
 """
 
+import contextlib
+import inspect
 import json
 import warnings
 from datetime import datetime
@@ -50,7 +52,15 @@ def to_json(*args, **kwargs) -> str:
     ** DEPRECATED **
     Use to_json_string() instead, which is exactly the same but with a better name.
     """
-    warnings.warn("to_json() is deperecated; use to_json_string()", DeprecationWarning)
+    text = "to_json() is deprecated; use to_json_string()"
+    # Give some context to help trace where it is used.
+    with contextlib.suppress(Exception):
+        stack = inspect.stack()[1]
+        text += "\nLikely `to_json()` is used here:"
+        text += f"\n\tfile: {stack.filename}"
+        text += f"\n\tline: {stack.lineno}"
+        text += f"\n\tsrc: {stack.code_context}"
+    warnings.warn(text, DeprecationWarning)
     return to_json_string(*args, **kwargs)
 
 
