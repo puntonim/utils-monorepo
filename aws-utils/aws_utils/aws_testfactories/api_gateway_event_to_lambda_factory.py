@@ -133,7 +133,7 @@ class ApiGatewayV2EventToLambdaFactory:
         }
         body = None
         if body_dict is not None:
-            body = json_utils.to_json(body_dict)
+            body = json_utils.to_json_string(body_dict)
         elif body_json is not None:
             body = body_json
         if body is not None:

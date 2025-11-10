@@ -67,7 +67,9 @@ class BaseJsonResponse(ABC):
         if self.body is not None:
             response["Content-Type"] = "application/json"
             response["body"] = (
-                json_utils.to_json(self.body) if self.do_convert_to_json else self.body
+                json_utils.to_json_string(self.body)
+                if self.do_convert_to_json
+                else self.body
             )
 
         # Log the response only if not a 2XX.
