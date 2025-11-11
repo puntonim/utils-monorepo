@@ -14,11 +14,21 @@ class PowertoolsLoggerAdapter(BaseLogAdapter):
 
     def configure_default(
         self,
+        #  Mind that "service" (and not "app") is the exact term used by
+        #   aws_lambda_powertools.Logger.
         service_name: str,
         service_version: str | None = None,
         is_verbose=False,
         handler=None,  # To be used in tests, eg. `caplog.handler`.
     ):
+        """
+        Args:
+            service_name: service name to be used in the logs. Mind that "service" (and
+             not "app") is the exact term used by aws_lambda_powertools.Logger.
+            service_version: service version to be used in the logs.
+            is_verbose: True to set the level to DEBUG.
+            handler: to be used in tests,  eg. `caplog.handler`.
+        """
         level = logging.DEBUG if is_verbose else logging.INFO
         service = service_name
         if service_version:
