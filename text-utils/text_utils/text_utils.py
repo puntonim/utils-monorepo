@@ -18,6 +18,7 @@ __all__ = [
     "truncate_text",
     "title_to_snake",
     "Emoji",
+    "FormatForConsole",
 ]
 
 
@@ -79,3 +80,31 @@ class Emoji:
     RIGHT_ARROW = "\U000027A1"
     STAR = "\U00002B50"
     MUSCLE = "\U0001F4AA"
+
+
+class FormatForConsole:
+    """
+    ANSI codes for setting the color in console (terminal).
+
+    For a more portable version, I could use UNIX `tput` program, see:
+     https://gist.github.com/martin-ueding/4007035
+
+    Usage:
+        import text_utils
+        Col = text_utils.FormatForConsole
+        print(
+            f"{Col.BOLD}{Col.UNDERLINE}"
+            f"TELEGRAM WEBHOOK CONFIGURATION"
+            f"{Col.ENDC}"
+        )
+    """
+
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
