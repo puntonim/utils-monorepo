@@ -5,164 +5,115 @@
 Log Adapter is the entry point for log-utils lib.
 
 Log-utils is meant to be used by:
- A. projects (cli, webapps, AWS Lambda, ...) that use libs in this utils-monorepo
- B. any project or lib (that do NOT use libs in this utils-monorepo)
+    A. any library created by me, in any repository;
+    B. any project (cli, webapps, AWS Lambda, ...) that uses such libs in point A;
+    C. any project or lib (that does NOT use such libs in point A)
 
 See README.md to know how to install log-utils.
 
 
-A - PROJECTS THAT USE LIBS IN utils-monorepo
-============================================
-Log-utils is used by other libs in this utils-monorepo in order to log entries
- in a way that works for any project (that use std lib or loguru or others).
-And libs in this utils-monorepo can be part of different projects like an AWS Lambda
- project (eg. Job Scheduler, Slackbot) or a CLI (eg. Events Publisher released as
- Docker image).
-So, those libs need to **be able to log entries in such a way that works for different
- projects**.
+A - ANY **LIBRARY** created by me
+========================================================================================
+Add `log_utils` as requirement:
+    `$ poetry add git+https://github.com/puntonim/utils-monorepo#subdirectory=log-utils`
+Then:
+    ```py
+    import log_utils as logger
 
-How it works
-------------
-The idea is:
- - Libs in this utils-monorepo import log-utils (`import log_utils as logger`) and
-    have generic log statements like `logger.info("Done")`; example: peewee-utils.
- - Projects that requires libs in this utils-monorepo that use log-utils must import
-    log-utils (`import log_utils as logger`), then set the right adapter (loguru,
-    AWS Powertools, rich or std lib's logging module) with
-    `logger.set_adapter(logger.LoguruAdapter())` and finally have log statements
-    like `logger.info("START")` where the logger is either from log-utils or
-    from loguru|powertools directly.
+    # From anywhere in the source code, I can easily log with:
+    logger.debug("Debug log from LIBRARY")
+    logger.info("Info log from LIBRARY", extra=dict(color="red"))
+    logger.error("Error log from LIBRARY")
+    ```
 
-Example: CLI project (released as Docker image)
------------------------------------------------
+Any library created by me should use `log_utils` for logging, like in the example above.
+
+Example scenario:
+ - I create the new library `foo-lib`, add `log-utils` as its requirement, and in its
+    source code I use log statements as in the example above;
+ - Then I create the new project `foo-project`, add `foo-lib` and `log-utils` as its
+    requirements, and configure the rich-adapter (as explained in the next section).
+ - The result is that all log statements work with rich, seamlessly.
+
+
+
+B - ANY **PROJECT** that uses such libs in point A
+========================================================================================
+Add `log_utils` as requirement, with the right adapters:
+    `$ poetry add "git+https://github.com/puntonim/utils-monorepo#subdirectory=log-utils[rich-adapter,loguru-adapter,powertools-adapter]"`
+Then:
+    ```py
+    import log_utils as logger
+
+    # To configure the std lib adapter.  <------------Typical use case: temp scripts ---
+    std_lib_log = logger.StdLibLoggingAdapter()
+    std_lib_log.configure_default(is_verbose=False)
+    logger.set_adapter(std_lib_log)
+
+    # Or, to configure powertools-adapter. <----------------Typical use case: Lambda ---
+    powertools_logger = logger.PowertoolsLoggerAdapter()
+    powertools_logger.configure_default(
+        service_name=settings.APP_NAME,
+        service_version=__version__,
+        is_verbose=False,
+    )
+    logger.set_adapter(powertools_logger)
+
+    # Or, to configure rich-adapter. <-------------------------Typical use case: CLI ---
+    rich = logger.RichAdapter()
+    rich.configure_default(is_verbose=False)
+    logger.set_adapter(rich)
+
+    # Or, to configure loguru-adapter. <--------------Typical use case: advanced CLI ---
+    loguru = logger.LoguruAdapter()
+    loguru.configure_default(do_enable_file_logging=True, log_file_name="map-cli.log")
+    logger.set_adapter(loguru)
+
+
+    # From anywhere in the source code, I can easily log with:
+    logger.info("Info log from LIBRARY", extra=dict(color="red"))
+    ```
+
 Actual examples:
- - ibkr-cli in patatrack-monorepo, CLI with Rich:
-     https://github.com/puntonim/patatrack-monorepo/blob/770092dabc3b6fb8dc3a9f03cea6b4ca15055a1c/projects/ibkr-cli/ibkr_cli/cli.py#L31
- - event-publisher, Docker CLI with Loguru:
-     hdmap-web/projects/event-publisher/event_publisher/cli.py
+  Lambda:
+     - botte-be, AWS Lambda with Powertools:
+        https://github.com/puntonim/botte-monorepo/tree/main/projects/botte-be
+     - odd-manager, AWS Lambda REST API with Powertools:
+        hdmap-web/projects/odd-manager/odd_manager/views/endpoints/odd_definition_view/read_all_view.py
 
-Suppose my new project "space" pip-installs the lib `peewee-utils` (or any other lib in
- utils-monorepo) that requires `log-utils`.
-The project "space" invokes `set_adapter(...)` with a `LoguruAdapter` so that
- `peewee-utils` logs entries using Loguru (instead of the default std libs's logging
- module).
-
-So, in project "space", in the main `cli.py`:
-```py
-import log_utils as logger
-
-loguru = logger.LoguruAdapter()
-# Now, if loguru hasn't been configured for the "Space" project yet, then we can:
-# loguru.configure_default(do_enable_file_logging=True, log_file_name="map-cli.log")
-logger.set_adapter(loguru)
-
-## Or, if the project was to use rich:
-# rich = logger.RichAdapter()
-# logger.set_adapter(rich)
-```
-and now anywhere in the project we can:
-```py
-# Now we can log either using logger from log-utils or loguru:
-import log_utils as logger  # Or: from loguru import logger.
-logger.debug("START")
-```
-
-Note: the `peewee-utils` lib contains log entries that are agnostic of the actual
- adapter in use, like:
-```py
-import log_utils as logger
-logger.debug("Hello", extra={"color": "red"})
-```
-
-Example: AWS Lambda project
----------------------------
-Actual examples:
- - botte-be, AWS Lambda with Powertools:
-    https://github.com/puntonim/botte-monorepo/tree/main/projects/botte-be
- - odd-manager, AWS Lambda REST API with Powertools:
-    hdmap-web/projects/odd-manager/odd_manager/views/endpoints/odd_definition_view/read_all_view.py
-
-Suppose my new project "space" pip-installs the lib `peewee-utils` (or any other lib in
- utils-monorepo) that requires `log-utils`.
-The project "space" invokes `set_adapter(...)` with a `PowertoolsLoggerAdapter` so
- that `peewee-utils` logs entries using Powertools (instead of the default std libs's
- logging module).
-
-So, in project "space", in *every* lambda handler (view):
-```py
-import log_utils as logger
-
-# Note: I can also move this block to a `lambda_static_init()` fn shared across all
-#  Lambdas in the project, see `botte-be`.
-powertools_logger = logger.PowertoolsLoggerAdapter()
-# Now we can either invoke `configure_default()` or configure directly Powertools
-#  in the project.
-powertools_logger.configure_default(
-    service_name=settings.APP_NAME,
-    service_version=__version__,
-    is_verbose=False,
-)
-logger.set_adapter(powertools_logger)
-
-logger.info("ENDPOINT INTROSPECTION: LOADING")
-
-@logger.get_adapter().inject_lambda_context(log_event=True)
-def lambda_handler(event: dict[str, Any], context: LambdaContext) -> dict:
-    logger.info("ENDPOINT INTROSPECTION: START")
-    ...
-```
-
-And in any other file in the project, I can just:
-```py
-# I can log either using logger from log-utils or powertools:
-import log_utils as logger
-logger.debug("Hello", extra={"color": "red"})
-```
-
-Note: the `peewee-utils` lib contains log entries that are agnostic of the actual
- adapter in use, like:
-```py
-import log_utils as logger
-logger.debug("Hello", extra={"color": "red"})
-```
+  CLI:
+     - ibkr-cli in patatrack-monorepo, CLI with Rich:
+         https://github.com/puntonim/patatrack-monorepo/blob/770092dabc3b6fb8dc3a9f03cea6b4ca15055a1c/projects/ibkr-cli/ibkr_cli/cli.py#L31
+     - event-publisher, Docker CLI with Loguru:
+         hdmap-web/projects/event-publisher/event_publisher/cli.py
 
 
-B. ANY PROJECT OR LIB
-=====================
-Any project or lib, that do NOT use libs in this utils-monorepo, can use log-utils for
- a simple logging that can be extended in the future.
 
-My new project "space" pip-installs the lib `log-utils` for simple logging.
+C. ANY PROJECT OR LIB (that does NOT use such libs in point A)
+========================================================================================
+Any project or lib, that do NOT use libs that use `log-utils`, can still use `log-utils`
+ for a simple logging system that can be extended in the future.
 
-So, in project "space", we can log with the std logging module straight away:
-```py
-import log_utils as logger
+Example scenario:
+ - My new project "space" pip-installs the lib `log-utils` for simple logging.
+ - So, in project "space", we can log with the std logging module straight away:
+    ```py
+    import log_utils as logger
 
-# And log entries like:
-logger.info("Hello world", extra=dict(weight=81))
-```
-Or we can configure StdLibLoggingAdapter and customize its defaults:
-```py
-import log_utils as logger
+    # And log entries like:
+    logger.info("Hello world", extra=dict(weight=81))
+    ```
+   Or we can configure StdLibLoggingAdapter and customize its defaults:
+    ```py
+    import log_utils as logger
 
-std_lib_log = logger.StdLibLoggingAdapter()
-std_lib_log.configure_default(level=logging.ERROR)
-logger.set_adapter(std_lib_log)
+    std_lib_log = logger.StdLibLoggingAdapter()
+    std_lib_log.configure_default(level=logging.ERROR)
+    logger.set_adapter(std_lib_log)
 
-# And log entries like:
-logger.error("Hello world", extra=dict(weight=81))
-```
-Or we can configure StdLibLoggingAdapter and customize its defaults:
-```py
-import log_utils as logger
-
-rich_log = logger.RichAdapter()
-rich_log.configure_default()
-logger.set_adapter(rich_log)
-
-# And log entries like:
-logger.error("Hello world", extra=dict(weight=81))
-```
+    # And log entries like:
+    logger.error("Hello world", extra=dict(weight=81))
+    ```
 """
 
 import logging
