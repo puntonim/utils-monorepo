@@ -16,7 +16,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project.optional-dependencies]
 # Extra (optional) dependencies that users of this project might choose to install or not.
-rich-adapter = ["rich (>=13.9.4,<14.0.0)"]
+rich-adapter = ["rich (>=13.9.4,<15.0.0)"]
 loguru-adapter = ["loguru (>=0.7.3,<0.8.0) ; python_version < '4'"]
 powertools-adapter = ["aws-lambda-powertools (>=3.5.0,<4.0.0) ; python_version < '4'"]
 
