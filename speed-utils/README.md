@@ -6,9 +6,6 @@ Just some Python speed utils.
 
 ⚡ Usage
 =====
-
----
-
 See top docstrings in [speed_utils.py](speed_utils/speed_utils.py).
 
 Poetry install
@@ -33,17 +30,11 @@ Same syntax as Poetry, but change `poetry add` with `pip install`.
 
 🛠️ Development setup
 ====================
-
----
-
 See [README.md](../README.md) in the root dir.
 
 
 🚀 Deployment
 =============
-
----
-
 *Not deployed* as it can be (pip-)installed directly from Github o local dir 
  (see Usage section).\
 And *not versioned* as when (pip-)installing from Github, it is possible to choose
@@ -52,7 +43,4 @@ And *not versioned* as when (pip-)installing from Github, it is possible to choo
 
 ©️ Copyright
 ============
-
----
-
 Copyright puntonim (https://github.com/puntonim). No License.

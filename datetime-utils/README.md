@@ -6,9 +6,6 @@ Just some Python date and time utils.
 
 ⚡ Usage
 =======
-
----
-
 See top docstrings in [datetime_utils.py](datetime_utils/datetime_utils.py)
  and [datetime_testutils.py](datetime_utils/datetime_testutils.py).
 
@@ -34,17 +31,11 @@ Same syntax as Poetry, but change `poetry add` with `pip install`.
 
 🛠️ Development setup
 ====================
-
----
-
 See [README.md](../README.md) in the root dir.
 
 
 🚀 Deployment
 =============
-
----
-
 *Not deployed* as it can be (pip-)installed directly from Github o local dir 
  (see Usage section).\
 And *not versioned* as when (pip-)installing from Github, it is possible to choose
@@ -53,7 +44,4 @@ And *not versioned* as when (pip-)installing from Github, it is possible to choo
 
 ©️ Copyright
 ============
-
----
-
 Copyright puntonim (https://github.com/puntonim). No License.

@@ -6,9 +6,6 @@ Just some Python settings utils.
 
 ⚡ Usage
 =======
-
----
-
 See top docstrings in [settings_utils.py](settings_utils/settings_utils.py)
  and [settings_testutils.py](settings_utils/settings_testutils.py).
 
@@ -42,17 +39,11 @@ Same syntax as Poetry, but change `poetry add` with `pip install`.
 
 🛠️ Development setup
 ====================
-
----
-
 See [README.md](../README.md) in the root dir.
 
 
 🚀 Deployment
 =============
-
----
-
 *Not deployed* as it can be (pip-)installed directly from Github o local dir 
  (see Usage section).\
 And *not versioned* as when (pip-)installing from Github, it is possible to choose
@@ -61,7 +52,4 @@ And *not versioned* as when (pip-)installing from Github, it is possible to choo
 
 ©️ Copyright
 ============
-
----
-
 Copyright puntonim (https://github.com/puntonim). No License.
