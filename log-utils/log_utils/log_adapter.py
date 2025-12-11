@@ -173,7 +173,7 @@ def set_root_logger_to_stderr():
         root.handlers[0].stream = sys.stderr
 
 
-def debug(message: str, extra: dict | None = None):
+def debug(message: str, extra: dict | None = None, **kwargs):
     """
     Debug-level logging.
     Eg. logger.debug("Nice color", extra=dict(color="red"))
@@ -182,10 +182,10 @@ def debug(message: str, extra: dict | None = None):
         message (str): the message string.
         extra (dict): optional extra data to be logged.
     """
-    get_adapter().debug(message, extra)
+    get_adapter().debug(message, extra, **kwargs)
 
 
-def info(message: str, extra: dict | None = None):
+def info(message: str, extra: dict | None = None, **kwargs):
     """
     Info-level logging.
     Eg. logger.info("Nice color", extra=dict(color="red"))
@@ -194,10 +194,10 @@ def info(message: str, extra: dict | None = None):
         message (str): the message string.
         extra (dict): optional extra data to be logged.
     """
-    get_adapter().info(message, extra)
+    get_adapter().info(message, extra, **kwargs)
 
 
-def warning(message: str, extra: dict | None = None):
+def warning(message: str, extra: dict | None = None, **kwargs):
     """
     Warning-level logging.
     Eg. logger.warning("Nice color", extra=dict(color="red"))
@@ -206,10 +206,10 @@ def warning(message: str, extra: dict | None = None):
         message (str): the message string.
         extra (dict): optional extra data to be logged.
     """
-    get_adapter().warning(message, extra)
+    get_adapter().warning(message, extra, **kwargs)
 
 
-def error(message: str, extra: dict | None = None):
+def error(message: str, extra: dict | None = None, **kwargs):
     """
     Error-level logging.
     Eg. logger.error("Nice color", extra=dict(color="red"))
@@ -218,10 +218,10 @@ def error(message: str, extra: dict | None = None):
         message (str): the message string.
         extra (dict): optional extra data to be logged.
     """
-    get_adapter().error(message, extra)
+    get_adapter().error(message, extra, **kwargs)
 
 
-def critical(message: str, extra: dict | None = None):
+def critical(message: str, extra: dict | None = None, **kwargs):
     """
     Critical-level logging.
     Eg. logger.critical("Nice color", extra=dict(color="red"))
@@ -230,10 +230,10 @@ def critical(message: str, extra: dict | None = None):
         message (str): the message string.
         extra (dict): optional extra data to be logged.
     """
-    get_adapter().critical(message, extra)
+    get_adapter().critical(message, extra, **kwargs)
 
 
-def exception(message: str | None = None, extra: dict | None = None):
+def exception(message: str | None = None, extra: dict | None = None, **kwargs):
     """
     Log an exception. Notice that the actual exception is not given as parameter but
      it is automatically found in the stack trace.
@@ -243,7 +243,7 @@ def exception(message: str | None = None, extra: dict | None = None):
         message (str): the message string.
         extra (dict): optional extra data to be logged.
     """
-    get_adapter().exception(message, extra)
+    get_adapter().exception(message, extra, **kwargs)
 
 
 class BaseLogUtilsException(Exception):

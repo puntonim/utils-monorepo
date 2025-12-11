@@ -77,29 +77,31 @@ class LoguruAdapter(BaseLogAdapter):
             extra = dict()
         return message, extra
 
-    def debug(self, message: str, extra: dict | None = None):
+    def debug(self, message: str, extra: dict | None = None, **kwargs):
         message, extra = self._format_message_and_extra(message, extra)
-        self.logger.debug(message, **extra)
+        self.logger.debug(message, **extra, **kwargs)
 
-    def info(self, message: str, extra: dict | None = None):
+    def info(self, message: str, extra: dict | None = None, **kwargs):
         message, extra = self._format_message_and_extra(message, extra)
-        self.logger.info(message, **extra)
+        self.logger.info(message, **extra, **kwargs)
 
-    def warning(self, message: str, extra: dict | None = None):
+    def warning(self, message: str, extra: dict | None = None, **kwargs):
         message, extra = self._format_message_and_extra(message, extra)
-        self.logger.warning(message, **extra)
+        self.logger.warning(message, **extra, **kwargs)
 
-    def error(self, message: str, extra: dict | None = None):
+    def error(self, message: str, extra: dict | None = None, **kwargs):
         message, extra = self._format_message_and_extra(message, extra)
-        self.logger.error(message, **extra)
+        self.logger.error(message, **extra, **kwargs)
 
-    def critical(self, message: str, extra: dict | None = None):
+    def critical(self, message: str, extra: dict | None = None, **kwargs):
         message, extra = self._format_message_and_extra(message, extra)
-        self.logger.critical(message, **extra)
+        self.logger.critical(message, **extra, **kwargs)
 
-    def exception(self, message: str | None = None, extra: dict | None = None):
+    def exception(
+        self, message: str | None = None, extra: dict | None = None, **kwargs
+    ):
         message, extra = self._format_message_and_extra(message, extra)
-        self.logger.exception(message, **extra)
+        self.logger.exception(message, **extra, **kwargs)
 
 
 class BaseLoguruAdapterException(Exception):

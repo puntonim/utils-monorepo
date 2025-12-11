@@ -40,26 +40,28 @@ class PowertoolsLoggerAdapter(BaseLogAdapter):
             logger_handler=handler,
         )
 
-    def debug(self, message: str, extra: dict | None = None):
+    def debug(self, message: str, extra: dict | None = None, **kwargs):
         # Use stacklevel=4 to get to the original source line that
         #  invoked the log statement, which is 4 frames above in the stack.
         # It's an arg used in Python std-lib logging:
         #  https://docs.python.org/3/library/logging.html#logging.Logger.debug
-        self.logger.debug(message, extra=extra, stacklevel=4)
+        self.logger.debug(message, extra=extra, stacklevel=4, **kwargs)
 
-    def info(self, message: str, extra: dict | None = None):
-        self.logger.info(message, extra=extra, stacklevel=4)
+    def info(self, message: str, extra: dict | None = None, **kwargs):
+        self.logger.info(message, extra=extra, stacklevel=4, **kwargs)
 
-    def warning(self, message: str, extra: dict | None = None):
-        self.logger.warning(message, extra=extra, stacklevel=4)
+    def warning(self, message: str, extra: dict | None = None, **kwargs):
+        self.logger.warning(message, extra=extra, stacklevel=4, **kwargs)
 
-    def error(self, message: str, extra: dict | None = None):
-        self.logger.error(message, extra=extra, stacklevel=4)
+    def error(self, message: str, extra: dict | None = None, **kwargs):
+        self.logger.error(message, extra=extra, stacklevel=4, **kwargs)
 
-    def critical(self, message: str, extra: dict | None = None):
-        self.logger.critical(message, extra=extra, stacklevel=4)
+    def critical(self, message: str, extra: dict | None = None, **kwargs):
+        self.logger.critical(message, extra=extra, stacklevel=4, **kwargs)
 
-    def exception(self, message: str | None = None, extra: dict | None = None):
+    def exception(
+        self, message: str | None = None, extra: dict | None = None, **kwargs
+    ):
         if extra:
             message = message or ""
             for key, value in extra.items():
@@ -68,7 +70,7 @@ class PowertoolsLoggerAdapter(BaseLogAdapter):
                     message += "\n"
                 message += f"{key}={serialized_value}"
         self.logger.exception(
-            message, exc_info=sys.exc_info(), stack_info=True, stacklevel=4
+            message, exc_info=sys.exc_info(), stack_info=True, stacklevel=4, **kwargs
         )
 
     def inject_lambda_context(self, *args, **kwargs):
