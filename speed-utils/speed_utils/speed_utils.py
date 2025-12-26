@@ -15,6 +15,7 @@ from math import floor
 __all__ = [
     "minpkm_base10_to_base60",
     "mps_to_minpkm_base10",
+    "mps_to_kmph",
 ]
 
 
@@ -38,3 +39,11 @@ def mps_to_minpkm_base10(x: float) -> float:
     Note that 5.05 min/km could then be converted to base60 to 5:03 min/km.
     """
     return 60 / (x * 3.6)
+
+
+def mps_to_kmph(x: float) -> float:
+    """
+    Eg. 4.344 m/s -> 15.6384 min/km.
+        mps_to_kmph(4.344) -> 15.6384
+    """
+    return x * 3.6
