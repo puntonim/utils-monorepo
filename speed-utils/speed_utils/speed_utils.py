@@ -63,8 +63,9 @@ def mps_to_minpkm_base10(x: float | int) -> float:
         mps_to_minpkm_base10(3.3) -> 5.05
     Note that 5.05 min/km could then be converted to base60 to 5:03 min/km.
     """
-    if not isinstance(x, (float, int)):
-        raise ValueError("only float and int arg supported")
+    # Hack: support also Pandas' DataFrame (without importing it).
+    if not isinstance(x, (float, int)) and x.__class__.__name__ != "DataFrame":
+        raise ValueError(f"only float, int and DataFrame arg supported, not {type(x)}")
     return 60 / (x * 3.6)
 
 
@@ -73,8 +74,9 @@ def minpkm_base10_to_mps(x: float | int) -> float:
     Eg. 5.05 min/km -> 3.3 m/s.
         minpkm_base10_to_mps(5.05) -> 3.3
     """
-    if not isinstance(x, (float, int)):
-        raise ValueError("only float and int arg supported")
+    # Hack: support also Pandas' DataFrame (without importing it).
+    if not isinstance(x, (float, int)) and x.__class__.__name__ != "DataFrame":
+        raise ValueError(f"only float, int and DataFrame arg supported, not {type(x)}")
     return 60 / (x * 3.6)
 
 
@@ -83,8 +85,9 @@ def mps_to_kmph(x: float | int) -> float:
     Eg. 4.344 m/s -> 15.6384 min/km.
         mps_to_kmph(4.344) -> 15.6384
     """
-    if not isinstance(x, (float, int)):
-        raise ValueError("only float and int arg supported")
+    # Hack: support also Pandas' DataFrame (without importing it).
+    if not isinstance(x, (float, int)) and x.__class__.__name__ != "DataFrame":
+        raise ValueError(f"only float, int and DataFrame arg supported, not {type(x)}")
     return x * 3.6
 
 
@@ -93,6 +96,7 @@ def kmph_to_mps(x: float | int) -> float:
     Eg. 15.6384 min/km -> 4.344 m/s.
         kmph_to_mps(15.6384) -> 4.344 m/s
     """
-    if not isinstance(x, (float, int)):
-        raise ValueError("only float and int arg supported")
+    # Hack: support also Pandas' DataFrame (without importing it).
+    if not isinstance(x, (float, int)) and x.__class__.__name__ != "DataFrame":
+        raise ValueError(f"only float, int and DataFrame arg supported, not {type(x)}")
     return x / 3.6
