@@ -28,7 +28,7 @@ def minpkm_base10_to_base60(x: float | int) -> str:
         minpkm_base10_to_base60(5.05) -> "5:03".
     """
     if not isinstance(x, (float, int)):
-        raise ValueError("only float arg supported")
+        raise ValueError("only float and int arg supported")
     int_val = floor(x)
     dec_val = round((x - int_val) * 60)
     if dec_val == 60:
@@ -64,7 +64,7 @@ def mps_to_minpkm_base10(x: float | int) -> float:
     Note that 5.05 min/km could then be converted to base60 to 5:03 min/km.
     """
     if not isinstance(x, (float, int)):
-        raise ValueError("only float arg supported")
+        raise ValueError("only float and int arg supported")
     return 60 / (x * 3.6)
 
 
@@ -74,7 +74,7 @@ def minpkm_base10_to_mps(x: float | int) -> float:
         minpkm_base10_to_mps(5.05) -> 3.3
     """
     if not isinstance(x, (float, int)):
-        raise ValueError("only float arg supported")
+        raise ValueError("only float and int arg supported")
     return 60 / (x * 3.6)
 
 
@@ -84,7 +84,7 @@ def mps_to_kmph(x: float | int) -> float:
         mps_to_kmph(4.344) -> 15.6384
     """
     if not isinstance(x, (float, int)):
-        raise ValueError("only float arg supported")
+        raise ValueError("only float and int arg supported")
     return x * 3.6
 
 
@@ -94,5 +94,5 @@ def kmph_to_mps(x: float | int) -> float:
         kmph_to_mps(15.6384) -> 4.344 m/s
     """
     if not isinstance(x, (float, int)):
-        raise ValueError("only float arg supported")
+        raise ValueError("only float and int arg supported")
     return x / 3.6
