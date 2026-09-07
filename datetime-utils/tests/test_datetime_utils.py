@@ -164,6 +164,80 @@ class TestSecondsToHhMmSs:
     def test_long(self):
         assert datetime_utils.seconds_to_hh_mm_ss(9251445) == "107 days, 1:50:45"
 
+    def test_do_not_use_colon_but_letters(self):
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                0,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "0s"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                5,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "5s"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                55,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "55s"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                9 * 60 + 5,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "9m05s"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                59 * 60 + 5,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "59m05s"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                2 * 60 * 60 + 6 * 60 + 5,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "2h06m05s"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                2 * 60 * 60 + 59 * 60 + 5,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "2h59m05s"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                23 * 60 * 60 + 59 * 60 + 5,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "23h59m05s"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm_ss(
+                3 * 23 * 60 * 60 + 59 * 60 + 5,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "2 days, 21h59m05s"
+        )
+
 
 class TestSecondsToHhMm:
     def test_happy_flow(self):
@@ -315,8 +389,66 @@ class TestSecondsToHhMm:
 
     def test_long(self):
         assert (
-            datetime_utils.seconds_to_hh_mm(9251445) == "107 days, 1:51"
-        )  # Approx of "107 days, 1:50:45".
+            # Approx of "107 days, 1:50:45".
+            datetime_utils.seconds_to_hh_mm(9251445)
+            == "107 days, 1:51"
+        )
+
+    def test_do_not_use_colon_but_letters(self):
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                0,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "0m"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                9 * 60 + 5,
+                # do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "0h09m"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                9 * 60 + 5,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "9m"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                59 * 60 + 5,
+                # do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "0h59m"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                59 * 60 + 5,
+                do_hide_hours_and_mins_if_zero=True,
+                do_not_use_colon_but_letters=True,
+            )
+            == "59m"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                23 * 60 * 60 + 9 * 60 + 5,
+                do_not_use_colon_but_letters=True,
+            )
+            == "23h09m"
+        )
+        assert (
+            datetime_utils.seconds_to_hh_mm(
+                3 * 23 * 60 * 60 + 59 * 60 + 5,
+                do_not_use_colon_but_letters=True,
+            )
+            == "2 days, 21h59m"
+        )
 
 
 class TestReplaceTimezone:

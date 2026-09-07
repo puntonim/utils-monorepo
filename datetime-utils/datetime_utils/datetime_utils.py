@@ -338,9 +338,10 @@ def seconds_to_hh_mm_ss(
     seconds: int | float,
     do_use_leading_zero_fill: bool = False,
     do_hide_hours_and_mins_if_zero: bool = False,
+    do_not_use_colon_but_letters: bool = False,
 ) -> str:
     """
-    Convert seconds to the format h:mm:ss.
+    Convert seconds to the format h:mm:ss (or 2h09m:08s).
 
     Eg. datetime_utils.seconds_to_hh_mm_ss(5)    -> "0:00:05"
         datetime_utils.seconds_to_hh_mm_ss(
@@ -354,6 +355,9 @@ def seconds_to_hh_mm_ss(
             do_use_leading_zero_fill=True,
             do_hide_hours_and_mins_if_zero=True) -> "05"
         datetime_utils.seconds_to_hh_mm_ss(9251445) -> "107 days, 1:50:45"
+        datetime_utils.seconds_to_hh_mm_ss(
+            23 * 60 * 60 + 59 * 60 + 5,
+            do_not_use_colon_but_letters=True) -> "23h59m05s"
     """
     str_val = str(timedelta(seconds=seconds))
 
@@ -389,6 +393,16 @@ def seconds_to_hh_mm_ss(
             elif ":" not in str_val:
                 str_val = str_val[1:]
 
+    if do_not_use_colon_but_letters:
+        tks = str_val.rsplit(":", 1)
+        res = tks[-1] + "s"
+        if len(tks) > 1:
+            res = tks[0] + "m" + res
+
+        if ":" in res:
+            res = res.replace(":", "h")
+        str_val = res
+
     return str_val
 
 
@@ -396,9 +410,10 @@ def seconds_to_hh_mm(
     seconds: int | float,
     do_use_leading_zero_fill: bool = False,
     do_hide_hours_and_mins_if_zero: bool = False,
+    do_not_use_colon_but_letters: bool = False,
 ) -> str:
     """
-    Convert seconds to the format h:mm.
+    Convert seconds to the format h:mm (or 2h09m).
     If seconds are > 30 then it rounds the min to the next one.
 
     Eg. datetime_utils.seconds_to_hh_mm(1045)    -> "0:17"  # Approx of "0:17:25".
@@ -415,6 +430,9 @@ def seconds_to_hh_mm(
             do_use_leading_zero_fill=True,
             do_hide_hours_and_mins_if_zero=True) -> "00"
         datetime_utils.seconds_to_hh_mm(9251445) -> "107 days, 1:51"  # Approx of "107 days, 1:50:45".
+        datetime_utils.seconds_to_hh_mm(
+            59 * 60 + 5,
+            do_not_use_colon_but_letters=True) -> "0h59m"
     """
     str_val = seconds_to_hh_mm_ss(
         seconds, do_use_leading_zero_fill, do_hide_hours_and_mins_if_zero
@@ -424,15 +442,23 @@ def seconds_to_hh_mm(
     # If the seconds are > 30 then we round the min to the next one (by adding 31 secs).
     secs = int(str_val[last_col_ix + 1 :])
     if secs > 30:
-        return seconds_to_hh_mm(
+        str_val = seconds_to_hh_mm(
             seconds + 31, do_use_leading_zero_fill, do_hide_hours_and_mins_if_zero
         )
 
-    if last_col_ix > 0:
+    elif last_col_ix > 0:
         str_val = str_val[:last_col_ix]
     else:
         # There are only seconds.
         str_val = "0" if not do_use_leading_zero_fill else "00"
+
+    if do_not_use_colon_but_letters:
+        tks = str_val.rsplit(":", 1)
+        res = tks[-1] + "m"
+        if len(tks) > 1:
+            res = tks[0] + "h" + res
+        str_val = res
+
     return str_val
 
 
