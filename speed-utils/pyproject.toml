@@ -21,6 +21,7 @@ isort = "5.13.2"
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
 pytest-xdist = {extras = ["psutil"], version = "^3.6.1"}
+pandas = ">=2.3.3,<3.0.0"
 
 [tool.black]  # See: https://black.readthedocs.io/en/stable/pyproject_toml.html
 line-length = 88  # Default.
