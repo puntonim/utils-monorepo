@@ -30,7 +30,7 @@ def minpkm_base10_to_base60(x: float | int) -> str:
         minpkm_base10_to_base60(5.05) -> "5:03".
     """
     # Hack: support also Pandas' DataFrame (without importing it).
-    if x.__class__.__name__ == "DataFrame":
+    if _is_pandas_object(x):
         return x.map(minpkm_base10_to_base60)
 
     if not isinstance(x, (float, int)):
@@ -59,7 +59,7 @@ def minpkm_base60_to_base10(x: str) -> float:
         minpkm_base60_to_base10("5:03") -> 5.05.
     """
     # Hack: support also Pandas' DataFrame (without importing it).
-    if x.__class__.__name__ == "DataFrame":
+    if _is_pandas_object(x):
         return x.map(minpkm_base60_to_base10)
 
     exc_msg = (
@@ -90,13 +90,13 @@ def mps_to_minpkm_base10(x: float | int) -> float:
     if isinstance(x, (float, int)) and x == 0:
         return 0
     # Hack: support also Pandas' DataFrame (without importing it).
-    if not isinstance(x, (float, int)) and x.__class__.__name__ != "DataFrame":
+    if not isinstance(x, (float, int)) and not _is_pandas_object(x):
         raise ValueError(
             f"only float, int arg supported (even inside a Pandas DataFrame), not {type(x)}"
         )
     result = 60 / (x * 3.6)
 
-    if result.__class__.__name__ == "DataFrame":
+    if _is_pandas_object(result):
         try:
             np = importlib.import_module("numpy")
         except ImportError as exc:
@@ -120,13 +120,13 @@ def minpkm_base10_to_mps(x: float | int) -> float:
     if isinstance(x, (float, int)) and x == 0:
         return 0
     # Hack: support also Pandas' DataFrame (without importing it).
-    if not isinstance(x, (float, int)) and x.__class__.__name__ != "DataFrame":
+    if not isinstance(x, (float, int)) and not _is_pandas_object(x):
         raise ValueError(
             f"only float, int arg supported (even inside a Pandas DataFrame), not {type(x)}"
         )
     result = 60 / (x * 3.6)
 
-    if result.__class__.__name__ == "DataFrame":
+    if _is_pandas_object(result):
         try:
             np = importlib.import_module("numpy")
         except ImportError as exc:
@@ -148,9 +148,9 @@ def mps_to_kmph(x: float | int) -> float:
         mps_to_kmph(4.344) -> 15.6384
     """
     # Hack: support also Pandas' DataFrame (without importing it).
-    if not isinstance(x, (float, int)) and x.__class__.__name__ != "DataFrame":
+    if not isinstance(x, (float, int)) and not _is_pandas_object(x):
         raise ValueError(
-            f"only float, int arg supported (even inside a Pandas DataFrame), not {type(x)}"
+            f"Only float and int arg supported (even inside a Pandas DataFrame), not {type(x)}"
         )
     return x * 3.6
 
@@ -163,8 +163,18 @@ def kmph_to_mps(x: float | int) -> float:
         kmph_to_mps(15.6384) -> 4.344 m/s
     """
     # Hack: support also Pandas' DataFrame (without importing it).
-    if not isinstance(x, (float, int)) and x.__class__.__name__ != "DataFrame":
+    if not isinstance(x, (float, int)) and not _is_pandas_object(x):
         raise ValueError(
-            f"only float, int arg supported (even inside a Pandas DataFrame), not {type(x)}"
+            f"Only float and int arg supported (even inside a Pandas DataFrame), not {type(x)}"
         )
     return x / 3.6
+
+
+def _is_pandas_object(x):
+    # Hack-ish way to detect if an object is a Pandas' DataFrame, without having to
+    #  require pandas lib.
+    cls = type(x)
+    return cls.__module__.startswith("pandas.") and cls.__name__ in (
+        "DataFrame",
+        "Series",
+    )

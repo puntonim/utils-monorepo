@@ -27,6 +27,17 @@ class Test_minpkm_base10_to_base60:
             "4:00",
         ]
 
+    def test_series(self):
+        df = pd.DataFrame([5.05, 0, 4.999, 0.0, 0.01, 4.0001], columns=["pace"])
+        assert speed_utils.minpkm_base10_to_base60(df.pace).to_list() == [
+            "5:03",
+            "0:00",
+            "5:00",
+            "0:00",
+            "0:01",
+            "4:00",
+        ]
+
 
 class Test_minpkm_base60_to_base10:
     def test_happy_flow(self):
@@ -74,6 +85,35 @@ class Test_minpkm_base60_to_base10:
             4.02,
         ]
 
+    def test_series(self):
+        df = pd.DataFrame(
+            [
+                "5:03",
+                "0:00",
+                "5:00",
+                "4:59",
+                "5:01",
+                "0:00",
+                "0:01",
+                "4:00",
+                "3:59",
+                "4:01",
+            ],
+            columns=["pace"],
+        )
+        assert speed_utils.minpkm_base60_to_base10(df.pace).to_list() == [
+            5.05,
+            0,
+            5.0,
+            4.98,
+            5.02,
+            0.0,
+            0.02,
+            4.0,
+            3.98,
+            4.02,
+        ]
+
 
 class Test_mps_to_minpkm_base10:
     def test_happy_flow(self):
@@ -89,6 +129,17 @@ class Test_mps_to_minpkm_base10:
             columns=["pace"],
         )
         assert speed_utils.mps_to_minpkm_base10(df).pace.round(2).to_list() == [
+            5.05,
+            2.92,
+            0,
+        ]
+
+    def test_series(self):
+        df = pd.DataFrame(
+            [3.3, 5.7, 0],
+            columns=["pace"],
+        )
+        assert speed_utils.mps_to_minpkm_base10(df.pace).round(2).to_list() == [
             5.05,
             2.92,
             0,
@@ -114,6 +165,17 @@ class Test_minpkm_base10_to_mps:
             0,
         ]
 
+    def test_series(self):
+        df = pd.DataFrame(
+            [5.05, 2.92, 0],
+            columns=["pace"],
+        )
+        assert speed_utils.minpkm_base10_to_mps(df.pace).round(2).to_list() == [
+            3.30,
+            5.71,
+            0,
+        ]
+
 
 class Test_mps_to_kmph:
     def test_happy_flow(self):
@@ -132,6 +194,16 @@ class Test_mps_to_kmph:
             0,
         ]
 
+    def test_series(self):
+        df = pd.DataFrame(
+            [4.344, 0],
+            columns=["pace"],
+        )
+        assert speed_utils.mps_to_kmph(df.pace).to_list() == [
+            15.6384,
+            0,
+        ]
+
 
 class Test_kmph_to_mps:
     def test_happy_flow(self):
@@ -146,6 +218,16 @@ class Test_kmph_to_mps:
             columns=["pace"],
         )
         assert speed_utils.kmph_to_mps(df).pace.to_list() == [
+            4.344,
+            0,
+        ]
+
+    def test_series(self):
+        df = pd.DataFrame(
+            [15.6384, 0],
+            columns=["pace"],
+        )
+        assert speed_utils.kmph_to_mps(df.pace).to_list() == [
             4.344,
             0,
         ]
