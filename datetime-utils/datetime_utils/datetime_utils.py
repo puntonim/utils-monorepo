@@ -120,7 +120,7 @@ def local_timezone() -> tzinfo:
 def convert_to_timezone(d: datetime, tz: ZoneInfo | None = None) -> datetime:
     """
     Convert the given datetime to a different timezone, adjusting the date and time
-     according to the offset between the orignal and the new timezone.
+     according to the offset between the original and the new timezone.
     The given datetime can be naive.
 
     Args:
@@ -359,6 +359,9 @@ def seconds_to_hh_mm_ss(
             23 * 60 * 60 + 59 * 60 + 5,
             do_not_use_colon_but_letters=True) -> "23h59m05s"
     """
+    if not isinstance(seconds, (int, float)):
+        # If seconds is not an int or float (eg. it's a Pandas Int64), convert to int.
+        seconds = int(seconds)
     str_val = str(timedelta(seconds=seconds))
 
     if do_use_leading_zero_fill:

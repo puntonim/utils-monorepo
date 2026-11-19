@@ -482,11 +482,11 @@ class TestConvertToTimezone:
             2022, 4, 30, 18, 15, 0, tzinfo=ZoneInfo("America/New_York")
         )
 
-    def test_default_timezone(self):
-        d = datetime(2022, 5, 1, 0, 15, 0, tzinfo=ZoneInfo("America/New_York"))
-        r = datetime_utils.convert_to_timezone(d)
-        # Note: this test only works when run in Europe/Rome.
-        assert r == datetime(2022, 5, 1, 6, 15, 0, tzinfo=datetime_utils.now().tzinfo)
+    # def test_default_timezone(self):
+    #     d = datetime(2022, 5, 1, 0, 15, 0, tzinfo=ZoneInfo("America/New_York"))
+    #     r = datetime_utils.convert_to_timezone(d)
+    #     # Note: this test only works when run in Europe/Rome in summer time.
+    #     assert r == datetime(2022, 5, 1, 6, 15, 0, tzinfo=datetime_utils.now().tzinfo)
 
 
 class TestDateToDatetime:
